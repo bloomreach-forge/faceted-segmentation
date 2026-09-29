@@ -130,11 +130,6 @@
         <artifactId>bloomreach-facetedsegmentation-hst</artifactId>
         <version>${facetedsegmentation.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.bloomreach.forge.facetedsegmentation</groupId>
-        <artifactId>bloomreach-facetedsegmentation-common</artifactId>
-        <version>${facetedsegmentation.version}</version>
-      </dependency>
 
       <!-- other predefined runtime scope versioned dependencies -->
       <dependency>
