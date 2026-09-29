@@ -1,0 +1,37 @@
+{
+  "name": "@bloomreach-ps/faceted-segmentation-extension",
+  "version": "0.1.0",
+  "description": "Bloomreach brXM Open UI field for building faceted segmentation boolean expressions",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "catalog:generate": "node scripts/generate-catalog.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0 || >=24.0.0",
+    "npm": ">=10.0.0"
+  },
+  "dependencies": {
+    "@bloomreach/ui-extension": "^17.2.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.3",
+    "vitest": "^2.1.9"
+  },
+  "private": true
+}

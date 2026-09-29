@@ -1,0 +1,9 @@
+definitions:
+  namespace:
+    myproject:
+      uri: http://www.myproject.com/myproject/nt/1.0
+      cnd: namespaces/myproject.cnd
+    # facetseg: is NOT registered here. bloomreach-facetedsegmentation-repository (on the CMS
+    # classpath — see cms-dependencies/pom.xml) already registers it via its own
+    # hcm-config/main.yaml. Re-registering the same namespace from this module is redundant and
+    # risks a config-apply conflict between the two modules.

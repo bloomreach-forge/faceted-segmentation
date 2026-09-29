@@ -1,0 +1,19 @@
+# The plugin's own value-list folder, holding the facets it ships as a usable starting point.
+#
+# Deliberately NOT nested inside a project's `value-lists` folder: content definitions are keyed by
+# path, and a plugin should not have to assume a project's folder layout exists or that bootstrap
+# ordering puts it first. This folder is self-contained, and a project points the plugin at whichever
+# folder it wants via the `facetedSegmentationValueListsPath` bean.
+#
+# These three are examples, not a fixed set. A project normally replaces them with its own facets by
+# overriding that path — nothing here is required for the plugin to work.
+#
+# Note content is applied ONCE per path (tracked in the baseline), so editing these after first boot
+# needs `-Drepo.bootstrap=true` or an hcm-actions.yaml entry.
+/content/documents/administration/faceted-segmentation:
+  jcr:primaryType: hippostd:folder
+  jcr:mixinTypes: ['hippo:named', 'mix:versionable']
+  jcr:uuid: b6ef7697-3979-4955-ac74-0b81ba26061b
+  hippo:name: Faceted Segmentation
+  hippostd:foldertype: [new-document, new-folder]
+  hippostd:hasfolders: false

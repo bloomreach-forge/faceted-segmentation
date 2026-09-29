@@ -1,0 +1,20 @@
+# `hst:catalog` is declared explicitly (rather than assuming it already exists under `hst:default`)
+# so this definition doesn't depend on whichever node HST happens to pre-create for a reserved
+# configuration — HCM merges into an existing node of the same primary type without conflict, so
+# this is safe whether or not the node was already there.
+#
+# `hst:iconpath` is a plain site-webapp-relative static resource path (unlike `hst:template`'s
+# `webfile:` render path, it has no such URI-scheme prefix), so the svg it points at is shipped via
+# `META-INF/resources/images/...` in this jar instead of the webfiles bundle — Tomcat (and any
+# Servlet 3.0+ container) serves static resources bundled that way from a jar on the webapp's
+# classpath with no project-side wiring, the same convention libraries like webjars rely on.
+definitions:
+  config:
+    /hst:hst/hst:configurations/hst:default/hst:catalog/faceted-segmentation-plugin:
+      jcr:primaryType: hst:containeritempackage
+      /facetedsegmentation:
+        jcr:primaryType: hst:containeritemcomponent
+        hst:componentclassname: org.bloomreach.forge.facetedsegmentation.component.FacetedSegmentationComponent
+        hst:template: faceted-segmentation
+        hst:iconpath: images/facetedsegmentationplugin/facetedsegmentation.svg
+        hst:label: Faceted Segmentation

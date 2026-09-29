@@ -1,0 +1,10 @@
+# Registers the plugin's own JCR namespace.
+#
+# The plugin owns `facetseg:` so it can ship a ready-made section compound that any project composes
+# into its own document types, without the plugin having to know the project's namespace. This is the
+# same pattern the review-workflow forge plugin uses for `reviewworkflow:`.
+definitions:
+  namespace:
+    facetseg:
+      uri: http://www.bloomreach.org/forge/facetedsegmentation/nt/1.0
+      cnd: namespaces/facetseg.cnd

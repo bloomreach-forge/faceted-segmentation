@@ -1,0 +1,9 @@
+/hst:hst/hst:configurations/myproject/hst:workspace/hst:containers/homepage/main/facetedsegmentation:
+  jcr:primaryType: hst:containeritemcomponent
+  hst:componentclassname: org.bloomreach.forge.facetedsegmentation.component.FacetedSegmentationComponent
+  hst:iconpath: images/facetedsegmentationplugin/facetedsegmentation.svg
+  hst:label: Faceted Segmentation
+  hst:parameternames: [absentFacetPolicy, document, previewModeQueryParams]
+  hst:parametervalues: [strict, /content/documents/myproject/personalized-content/personalized-content-1,
+    day-of-the-week=friday&signedin=in]
+  hst:template: faceted-segmentation

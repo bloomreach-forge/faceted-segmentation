@@ -1,0 +1,75 @@
+{
+  "etag": "sha256-bc2498f18577554b70d21d243dca9fd0",
+  "generatedAt": "2026-09-25T23:36:19.221Z",
+  "facets": [
+    {
+      "id": "day-of-the-week",
+      "name": "Day of the Week",
+      "path": "/content/documents/administration/faceted-segmentation/day-of-the-week",
+      "values": [
+        {
+          "key": "sunday",
+          "label": "Sunday"
+        },
+        {
+          "key": "monday",
+          "label": "Monday"
+        },
+        {
+          "key": "tuesday",
+          "label": "Tuesday"
+        },
+        {
+          "key": "wednesday",
+          "label": "Wednesday"
+        },
+        {
+          "key": "thursday",
+          "label": "Thursday"
+        },
+        {
+          "key": "friday",
+          "label": "Friday"
+        },
+        {
+          "key": "saturday",
+          "label": "Saturday"
+        }
+      ]
+    },
+    {
+      "id": "signedin",
+      "name": "Signed In",
+      "path": "/content/documents/administration/faceted-segmentation/signedin",
+      "values": [
+        {
+          "key": "out",
+          "label": "Signed Out"
+        },
+        {
+          "key": "in",
+          "label": "Signed In"
+        }
+      ]
+    },
+    {
+      "id": "size",
+      "name": "Size",
+      "path": "/content/documents/administration/faceted-segmentation/size",
+      "values": [
+        {
+          "key": "S",
+          "label": "Small"
+        },
+        {
+          "key": "M",
+          "label": "Medium"
+        },
+        {
+          "key": "L",
+          "label": "Large"
+        }
+      ]
+    }
+  ]
+}

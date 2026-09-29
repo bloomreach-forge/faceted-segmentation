@@ -1,0 +1,16 @@
+# Bootstraps this plugin's repository configuration and content.
+#
+# `group: bloomreach-forge` is the shared group every Bloomreach Forge plugin bootstraps under.
+# `after: hippo-cms` guarantees core CMS configuration exists first.
+#
+# IMPORTANT for consuming projects: your own project group must declare
+#   group:
+#     name: <your-project>
+#     after: [hippo-cms, bloomreach-forge]
+# otherwise your configuration may be applied BEFORE this plugin's and the two can conflict.
+group:
+  name: bloomreach-forge
+  after: hippo-cms
+project: faceted-segmentation
+module:
+  name: bloomreach-facetedsegmentation-repository

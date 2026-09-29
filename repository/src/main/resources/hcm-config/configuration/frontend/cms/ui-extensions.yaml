@@ -1,0 +1,53 @@
+# Registers the faceted segmentation Open UI field with the CMS.
+#
+# The node NAME is the contract: every document type that wants this field sets
+# `ui.extension: facetedSegmentation` in its field's cluster.options. The name must be ALPHANUMERIC —
+# UiExtensionValidator rejects hyphens and dots, and a rejected extension is silently ignored, which
+# presents as "my field renders as a plain text box" with no error anywhere.
+#
+# TWO PROPERTIES BELOW ARE ENVIRONMENT-SPECIFIC and almost certainly need overriding per deployment:
+# `frontend:url` and the `catalogUrl` inside `frontend:config`. Both default to the conventional
+# same-origin paths. Since brXM 14.7 `frontend:config` resolves ${...} against the CMS container
+# configuration, so a project can parameterise them per environment without a rebuild:
+#
+#   frontend:url: ${facetedSegmentation.extensionUrl}
+#   frontend:config: '{"catalogUrl":"${facetedSegmentation.catalogUrl}", ...}'
+#
+# ...defining the values in $CATALINA_BASE/conf/platform.properties.
+definitions:
+  config:
+    /hippo:configuration/hippo:frontend/cms/ui-extensions/facetedSegmentation:
+      jcr:primaryType: frontend:uiExtension
+
+      # MANDATORY per the CND even though the value is unused for a document field extension.
+      # Omitting it fails config apply on boot with:
+      #   ConstraintViolationException: mandatory property ...displayName does not exist
+      frontend:displayName: Faceted Segmentation
+
+      # MANDATORY, and constrained to 'channel.page.tools' | 'document.field'. It DEFAULTS to
+      # channel.page.tools, so it must be set explicitly here.
+      frontend:extensionPoint: document.field
+
+      # Where the built extension assets are hosted. Defaults to a same-origin path under the CMS,
+      # which avoids needing any CSP frame-src entry at all. Point it at wherever you host dist/ —
+      # Bloomreach recommends a separate origin, in which case add that origin to frame-src.
+      frontend:url: http://localhost:5173/index.html
+
+      # Only governs the first paint: the field then calls setHeight('auto') and grows to fit.
+      frontend:initialHeightInPixels: 120
+
+      #   catalogUrl         where the iframe fetches facet values. The plugin's REST resource, which
+      #                      needs a mount with hst:namedpipeline: JaxrsRestPlainPipeline. There is NO
+      #                      fallback: if this is wrong the field reports the failure and disables the
+      #                      builder rather than authoring against stale data.
+      #   cacheTtlSeconds    how long the browser reuses a fetched catalog.
+      #   dialogSize         small | medium | large
+      #   absentFacetPolicy  strict | permissive — what happens when a visitor has NO value for a
+      #                      facet a rule names. strict (the default) fails both IN and NOT IN;
+      #                      permissive lets NOT IN pass.
+      #
+      #                      MUST match the delivery-tier component's own absentFacetPolicy parameter,
+      #                      or the builder's preview will disagree with what actually happens at
+      #                      request time. The delivery tier is authoritative.
+      #   facets             optional allow-list of value-list ids this field offers; omit for all.
+      frontend:config: '{"catalogUrl":"http://localhost:8080/site/api/facets","cacheTtlSeconds":900,"dialogSize":"large","absentFacetPolicy":"strict"}'

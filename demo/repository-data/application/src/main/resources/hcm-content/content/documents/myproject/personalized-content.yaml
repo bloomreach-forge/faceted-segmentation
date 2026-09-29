@@ -1,0 +1,369 @@
+/content/documents/myproject/personalized-content:
+  jcr:primaryType: hippostd:folder
+  jcr:mixinTypes: ['hippo:named', 'hippotranslation:translated', 'mix:versionable']
+  jcr:uuid: 959102af-8eb9-4beb-b4fb-4f6d11c4f33e
+  hippo:name: Personalized Content
+  hippostd:foldertype: [new-translated-folder, new-document, new-PersonalizedContent-document,
+    new-PersonalizedContent-folder]
+  hippostd:hasfolders: false
+  hippotranslation:id: 0879000d-a07c-4a32-9be9-95229b4debf7
+  hippotranslation:locale: en
+  /personalized-content-1:
+    jcr:primaryType: hippo:handle
+    jcr:mixinTypes: ['hippo:named', 'hippo:versionInfo', 'mix:referenceable']
+    jcr:uuid: 0f6f8435-fee3-455d-964e-ad79102e8419
+    hippo:name: Personalized Content 1
+    hippo:versionHistory: 3ea89a09-eb24-4947-8089-f11aaeb4de4f
+    /personalized-content-1[1]:
+      jcr:primaryType: facetseg:PersonalizedContent
+      jcr:mixinTypes: ['mix:referenceable']
+      jcr:uuid: a36216ed-f4d4-46fc-8d95-c5adfc2f34fb
+      hippo:availability: []
+      hippostd:retainable: false
+      hippostd:state: draft
+      hippostd:transferable: false
+      hippostdpubwf:createdBy: admin
+      hippostdpubwf:creationDate: 2026-09-21T19:29:09.039-04:00
+      hippostdpubwf:lastModificationDate: 2026-09-25T18:40:52.282-04:00
+      hippostdpubwf:lastModifiedBy: admin
+      hippotranslation:id: 62441804-f312-4063-915f-8dd0e8b792bf
+      hippotranslation:locale: en
+      /facetseg:public:
+        jcr:primaryType: hippostd:html
+        hippostd:content: <h1>Public Content 1</h1>
+      /facetseg:FacetedSegmentationSection[1]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: Day of the Week IN [Monday]
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visits on Monday</p>
+      /facetseg:FacetedSegmentationSection[2]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: Day of the Week IN [Tuesday]
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visits on Tuesday</p>
+      /facetseg:FacetedSegmentationSection[3]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: Day of the Week IN [Wednesday]
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visits on Wednesday</p>
+      /facetseg:FacetedSegmentationSection[4]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: Day of the Week NOT IN [Thursday]
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visits on a non-Thursday.</p>
+    /personalized-content-1[2]:
+      jcr:primaryType: facetseg:PersonalizedContent
+      jcr:mixinTypes: ['mix:referenceable', 'mix:versionable']
+      jcr:uuid: 45787456-12ca-4e1d-9f67-1723824effe7
+      hippo:availability: [preview]
+      hippostd:retainable: false
+      hippostd:state: unpublished
+      hippostdpubwf:createdBy: admin
+      hippostdpubwf:creationDate: 2026-09-21T19:29:09.039-04:00
+      hippostdpubwf:lastModificationDate: 2026-09-25T00:32:48.953-04:00
+      hippostdpubwf:lastModifiedBy: admin
+      hippotranslation:id: 62441804-f312-4063-915f-8dd0e8b792bf
+      hippotranslation:locale: en
+      /facetseg:public:
+        jcr:primaryType: hippostd:html
+        hippostd:content: <h1>Public Content 1</h1>
+      /facetseg:FacetedSegmentationSection[1]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: Day of the Week IN [Monday]
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visits on Monday</p>
+      /facetseg:FacetedSegmentationSection[2]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: Day of the Week IN [Tuesday]
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visits on Tuesday</p>
+      /facetseg:FacetedSegmentationSection[3]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: Day of the Week IN [Wednesday]
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visits on Wednesday</p>
+      /facetseg:FacetedSegmentationSection[4]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: Day of the Week NOT IN [Thursday]
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visits on a non-Thursday.</p>
+    /personalized-content-1[3]:
+      jcr:primaryType: facetseg:PersonalizedContent
+      jcr:mixinTypes: ['mix:referenceable']
+      jcr:uuid: 223c443f-ccc3-4462-a1f4-58f645d87dd2
+      hippo:availability: [live]
+      hippostd:retainable: false
+      hippostd:state: published
+      hippostdpubwf:createdBy: admin
+      hippostdpubwf:creationDate: 2026-09-21T19:29:09.039-04:00
+      hippostdpubwf:lastModificationDate: 2026-09-25T00:32:48.953-04:00
+      hippostdpubwf:lastModifiedBy: admin
+      hippostdpubwf:publicationDate: 2026-09-25T00:32:51.988-04:00
+      hippostdpubwf:publishedBy: admin
+      hippotranslation:id: 62441804-f312-4063-915f-8dd0e8b792bf
+      hippotranslation:locale: en
+      /facetseg:public:
+        jcr:primaryType: hippostd:html
+        hippostd:content: <h1>Public Content 1</h1>
+      /facetseg:FacetedSegmentationSection[1]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: Day of the Week IN [Monday]
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visits on Monday</p>
+      /facetseg:FacetedSegmentationSection[2]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: Day of the Week IN [Tuesday]
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visits on Tuesday</p>
+      /facetseg:FacetedSegmentationSection[3]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: Day of the Week IN [Wednesday]
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visits on Wednesday</p>
+      /facetseg:FacetedSegmentationSection[4]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: Day of the Week NOT IN [Thursday]
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visits on a non-Thursday.</p>
+  /personalized-content-2:
+    jcr:primaryType: hippo:handle
+    jcr:mixinTypes: ['hippo:named', 'hippo:versionInfo', 'mix:referenceable']
+    jcr:uuid: bc0e4730-43f3-49e2-9576-c67a9d06aa70
+    hippo:name: Personalized Content 2
+    hippo:versionHistory: 9b66f54c-23b1-4a7d-bf38-669f1bdc340a
+    /personalized-content-2[1]:
+      jcr:primaryType: facetseg:PersonalizedContent
+      jcr:mixinTypes: ['mix:referenceable']
+      jcr:uuid: c4ba82f0-f874-45ed-b89e-1f06a9ee3c5f
+      hippo:availability: []
+      hippostd:retainable: false
+      hippostd:state: draft
+      hippostdpubwf:createdBy: admin
+      hippostdpubwf:creationDate: 2026-09-21T19:30:08.937-04:00
+      hippostdpubwf:lastModificationDate: 2026-09-24T02:05:35.282-04:00
+      hippostdpubwf:lastModifiedBy: admin
+      hippotranslation:id: 830a12d0-0c7f-4d9e-80b1-2ace8d7be3d9
+      hippotranslation:locale: en
+      /facetseg:public:
+        jcr:primaryType: hippostd:html
+        hippostd:content: <h1>Public Content 2</h1>
+      /facetseg:FacetedSegmentationSection[1]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: "Day of the Week IN [Monday]\r\n  AND Signed\
+          \ In IN [Signed In]"
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visited on Monday and Is logged in&nbsp;</p>
+      /facetseg:FacetedSegmentationSection[2]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: "Day of the Week IN [Monday]\r\n  AND Signed\
+          \ In IN [Signed Out]"
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visited on Monday and Is logged out&nbsp;</p>
+    /personalized-content-2[2]:
+      jcr:primaryType: facetseg:PersonalizedContent
+      jcr:mixinTypes: ['mix:referenceable', 'mix:versionable']
+      jcr:uuid: 779d905f-3af4-4d1a-9bb2-ca41588610db
+      hippo:availability: [preview]
+      hippostd:retainable: false
+      hippostd:state: unpublished
+      hippostdpubwf:createdBy: admin
+      hippostdpubwf:creationDate: 2026-09-21T19:30:08.937-04:00
+      hippostdpubwf:lastModificationDate: 2026-09-24T02:05:36.729-04:00
+      hippostdpubwf:lastModifiedBy: admin
+      hippotranslation:id: 830a12d0-0c7f-4d9e-80b1-2ace8d7be3d9
+      hippotranslation:locale: en
+      /facetseg:public:
+        jcr:primaryType: hippostd:html
+        hippostd:content: <h1>Public Content 2</h1>
+      /facetseg:FacetedSegmentationSection[1]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: "Day of the Week IN [Monday]\r\n  AND Signed\
+          \ In IN [Signed In]"
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visited on Monday and Is logged in&nbsp;</p>
+      /facetseg:FacetedSegmentationSection[2]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: "Day of the Week IN [Monday]\r\n  AND Signed\
+          \ In IN [Signed Out]"
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visited on Monday and Is logged out&nbsp;</p>
+    /personalized-content-2[3]:
+      jcr:primaryType: facetseg:PersonalizedContent
+      jcr:mixinTypes: ['mix:referenceable']
+      jcr:uuid: 8fcc1381-4959-4c70-bf00-769e8d162f9c
+      hippo:availability: [live]
+      hippostd:retainable: false
+      hippostd:state: published
+      hippostdpubwf:createdBy: admin
+      hippostdpubwf:creationDate: 2026-09-21T19:30:08.937-04:00
+      hippostdpubwf:lastModificationDate: 2026-09-24T02:05:36.729-04:00
+      hippostdpubwf:lastModifiedBy: admin
+      hippostdpubwf:publicationDate: 2026-09-24T02:05:39.002-04:00
+      hippostdpubwf:publishedBy: admin
+      hippotranslation:id: 830a12d0-0c7f-4d9e-80b1-2ace8d7be3d9
+      hippotranslation:locale: en
+      /facetseg:public:
+        jcr:primaryType: hippostd:html
+        hippostd:content: <h1>Public Content 2</h1>
+      /facetseg:FacetedSegmentationSection[1]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: "Day of the Week IN [Monday]\r\n  AND Signed\
+          \ In IN [Signed In]"
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visited on Monday and Is logged in&nbsp;</p>
+      /facetseg:FacetedSegmentationSection[2]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: "Day of the Week IN [Monday]\r\n  AND Signed\
+          \ In IN [Signed Out]"
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: <p>Visited on Monday and Is logged out&nbsp;</p>
+  /personalized-content-3:
+    jcr:primaryType: hippo:handle
+    jcr:mixinTypes: ['hippo:named', 'hippo:versionInfo', 'mix:referenceable']
+    jcr:uuid: a314c40d-91f1-4104-8964-6ef0662bafe9
+    hippo:name: Personalized Content 3
+    hippo:versionHistory: 5b1239f9-1cd0-4f2d-b1b0-85b50b39dbb1
+    /personalized-content-3[1]:
+      jcr:primaryType: facetseg:PersonalizedContent
+      jcr:mixinTypes: ['mix:referenceable']
+      jcr:uuid: e067735c-d9f8-4428-a77f-dee4797977b0
+      hippo:availability: []
+      hippostd:retainable: false
+      hippostd:state: draft
+      hippostd:transferable: false
+      hippostdpubwf:createdBy: admin
+      hippostdpubwf:creationDate: 2026-09-21T19:30:45.151-04:00
+      hippostdpubwf:lastModificationDate: 2026-09-25T09:37:59.255-04:00
+      hippostdpubwf:lastModifiedBy: admin
+      hippotranslation:id: 6affa1f9-ad0f-4d85-8e35-2e13208df4fd
+      hippotranslation:locale: en
+      /facetseg:public:
+        jcr:primaryType: hippostd:html
+        hippostd:content: <h1>Public Content 3</h1>
+      /facetseg:FacetedSegmentationSection[1]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: "Day of the Week NOT IN [Monday]\r\n  AND Signed\
+          \ In IN [Signed In]\r\n  OR Size IN [Small]"
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: |-
+            <p>Visited on any day but Monday and Is logged in&nbsp;</p>
+
+            <p>Or</p>
+
+            <p>Size is small</p>
+      /facetseg:FacetedSegmentationSection[2]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: "(\r\n     Day of the Week NOT IN [Monday]\r\
+          \n       AND Size IN [Small]\r\n)\r\n  OR (\r\n       Day of the Week NOT\
+          \ IN [Friday]\r\n         AND Size IN [Large]\r\n  )"
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: |-
+            <p>Visited on any day but Monday and Is size small</p>
+
+            <p>Or</p>
+
+            <p>Visited on any day but Friday and Is size large</p>
+    /personalized-content-3[2]:
+      jcr:primaryType: facetseg:PersonalizedContent
+      jcr:mixinTypes: ['mix:referenceable', 'mix:versionable']
+      jcr:uuid: e5cdfecb-a1fc-4112-848b-5dd26744f072
+      hippo:availability: [preview]
+      hippostd:retainable: false
+      hippostd:state: unpublished
+      hippostdpubwf:createdBy: admin
+      hippostdpubwf:creationDate: 2026-09-21T19:30:45.151-04:00
+      hippostdpubwf:lastModificationDate: 2026-09-25T09:37:59.224-04:00
+      hippostdpubwf:lastModifiedBy: admin
+      hippotranslation:id: 6affa1f9-ad0f-4d85-8e35-2e13208df4fd
+      hippotranslation:locale: en
+      /facetseg:public:
+        jcr:primaryType: hippostd:html
+        hippostd:content: <h1>Public Content 3</h1>
+      /facetseg:FacetedSegmentationSection[1]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: "Day of the Week NOT IN [Monday]\r\n  AND Signed\
+          \ In IN [Signed In]\r\n  OR Size IN [Small]"
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: |-
+            <p>Visited on any day but Monday and Is logged in&nbsp;</p>
+
+            <p>Or</p>
+
+            <p>Size is small</p>
+      /facetseg:FacetedSegmentationSection[2]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: "(\r\n     Day of the Week NOT IN [Monday]\r\
+          \n       AND Size IN [Small]\r\n)\r\n  OR (\r\n       Day of the Week NOT\
+          \ IN [Friday]\r\n         AND Size IN [Large]\r\n  )"
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: |-
+            <p>Visited on any day but Monday and Is size small</p>
+
+            <p>Or</p>
+
+            <p>Visited on any day but Friday and Is size large</p>
+    /personalized-content-3[3]:
+      jcr:primaryType: facetseg:PersonalizedContent
+      jcr:mixinTypes: ['mix:referenceable']
+      jcr:uuid: db314014-e420-4f4c-a506-d152ff714190
+      hippo:availability: [live]
+      hippostd:retainable: false
+      hippostd:state: published
+      hippostdpubwf:createdBy: admin
+      hippostdpubwf:creationDate: 2026-09-21T19:30:45.151-04:00
+      hippostdpubwf:lastModificationDate: 2026-09-25T09:37:59.224-04:00
+      hippostdpubwf:lastModifiedBy: admin
+      hippostdpubwf:publicationDate: 2026-09-25T09:38:01.563-04:00
+      hippostdpubwf:publishedBy: admin
+      hippotranslation:id: 6affa1f9-ad0f-4d85-8e35-2e13208df4fd
+      hippotranslation:locale: en
+      /facetseg:public:
+        jcr:primaryType: hippostd:html
+        hippostd:content: <h1>Public Content 3</h1>
+      /facetseg:FacetedSegmentationSection[1]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: "Day of the Week NOT IN [Monday]\r\n  AND Signed\
+          \ In IN [Signed In]\r\n  OR Size IN [Small]"
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: |-
+            <p>Visited on any day but Monday and Is logged in&nbsp;</p>
+
+            <p>Or</p>
+
+            <p>Size is small</p>
+      /facetseg:FacetedSegmentationSection[2]:
+        jcr:primaryType: facetseg:FacetedSegmentationSection
+        facetseg:faceted_segmentation: "(\r\n     Day of the Week NOT IN [Monday]\r\
+          \n       AND Size IN [Small]\r\n)\r\n  OR (\r\n       Day of the Week NOT\
+          \ IN [Friday]\r\n         AND Size IN [Large]\r\n  )"
+        /facetseg:content:
+          jcr:primaryType: hippostd:html
+          hippostd:content: |-
+            <p>Visited on any day but Monday and Is size small</p>
+
+            <p>Or</p>
+
+            <p>Visited on any day but Friday and Is size large</p>

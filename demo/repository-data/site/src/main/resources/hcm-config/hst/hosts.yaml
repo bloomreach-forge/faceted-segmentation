@@ -1,0 +1,53 @@
+definitions:
+  config:
+    /hst:hst/hst:hosts/dev-localhost:
+      .meta:residual-child-node-category: content
+      jcr:primaryType: hst:virtualhostgroup
+      hst:defaultport: 8080
+      /localhost:
+        .meta:residual-child-node-category: content
+        jcr:primaryType: hst:virtualhost
+        /hst:root:
+          .meta:residual-child-node-category: content
+          jcr:primaryType: hst:mount
+          hst:homepage: root
+          hst:mountpoint: /hst:myproject/hst:sites/myproject
+          hst:pagemodelapi: resourceapi
+          # ------------------------------------------------------------------------------------
+          # Facet catalog endpoint for the faceted segmentation Open UI field.
+          #
+          #   http://localhost:8080/site/api/facets
+          #
+          # Served by bloomreach-facetedsegmentation-hst's FacetCatalogResource, registered in
+          # this project's own site module at
+          # META-INF/hst-assembly/overrides/custom-jaxrs-resources.xml — the plugin cannot
+          # self-register the endpoint because HST loads each addon into its own child Spring
+          # context, so the plain-JAX-RS pipeline in the ROOT context cannot see the plugin's
+          # resource bean. See that override file for the details.
+          # ------------------------------------------------------------------------------------
+          /api:
+            jcr:primaryType: hst:mount
+            hst:alias: facetcatalog
+            # The only strictly required property: routes to the optional plain JAX-RS pipeline
+            # imported by custom-jaxrs-resources.xml.
+            hst:namedpipeline: JaxrsRestPlainPipeline
+            # false = dispatch straight on this mount's pipeline. With the default (true) the
+            # request would additionally have to match a SITEMAP ITEM, which a pure REST mount
+            # has none of — the JAX-RS @Path does the routing instead.
+            hst:ismapped: false
+            # Keeps this out of the Channel Manager: it inherits hst:mountpoint from hst:root
+            # (which is what gives the resource a content base) but is not a browsable channel.
+            hst:nochannelinfo: true
+            hst:authenticated: false
+            hst:types: [rest]
+            # CORS. The extension runs on its own origin (the Vite dev server, or wherever dist/
+            # is hosted) so the fetch is cross-origin. Scoped to this mount rather than set on
+            # the virtualhost, so nothing else inherits it.
+            #
+            # Access-Control-Expose-Headers is NOT optional: without it the browser hides ETag
+            # from the client, the client can never send If-None-Match, and 304 revalidation
+            # silently never engages. The failure is invisible — just needless full payloads.
+            #
+            # `*` is safe here because the catalog is not user-specific and the client sends
+            # credentials: 'omit'. Narrow it to the extension's real origin when deploying.
+            hst:responseheaders: ['Access-Control-Allow-Origin: *', 'Access-Control-Expose-Headers: ETag']

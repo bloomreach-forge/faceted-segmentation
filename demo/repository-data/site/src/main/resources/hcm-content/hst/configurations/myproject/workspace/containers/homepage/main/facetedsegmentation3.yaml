@@ -1,0 +1,16 @@
+# Demonstrates the additive model: public content as a preamble, followed by EVERY matching
+# section, rather than the default "one winning section instead of public content".
+#
+# personalized-content-1's sections include both `Day of the Week IN [Monday]` and
+# `Day of the Week NOT IN [Thursday]`, so on a Monday two rules match — which is what makes the
+# difference between the two modes visible on the page rather than only in the logs.
+/hst:hst/hst:configurations/myproject/hst:workspace/hst:containers/homepage/main/facetedsegmentation3:
+  jcr:primaryType: hst:containeritemcomponent
+  hst:componentclassname: org.bloomreach.forge.facetedsegmentation.component.FacetedSegmentationComponent
+  hst:iconpath: images/facetedsegmentationplugin/facetedsegmentation.svg
+  hst:label: Faceted Segmentation
+  hst:parameternames: [absentFacetPolicy, document, previewModeQueryParams, sectionMatchMode,
+    publicContentMode]
+  hst:parametervalues: [strict, /content/documents/myproject/personalized-content/personalized-content-1,
+    day-of-the-week=monday&signedin=in, all-matches, always]
+  hst:template: faceted-segmentation

@@ -1,0 +1,8 @@
+/hst:hst/hst:configurations/myproject/hst:workspace/hst:containers/homepage/main/facetedsegmentation1:
+  jcr:primaryType: hst:containeritemcomponent
+  hst:componentclassname: org.bloomreach.forge.facetedsegmentation.component.FacetedSegmentationComponent
+  hst:iconpath: images/facetedsegmentationplugin/facetedsegmentation.svg
+  hst:label: Faceted Segmentation
+  hst:parameternames: [absentFacetPolicy, document]
+  hst:parametervalues: [strict, /content/documents/myproject/personalized-content/personalized-content-2]
+  hst:template: faceted-segmentation

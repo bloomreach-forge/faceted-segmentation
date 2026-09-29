@@ -1,0 +1,4 @@
+/content/documents/administration/labels:
+  jcr:primaryType: hippostd:folder
+  jcr:mixinTypes: ['mix:referenceable']
+  hippostd:foldertype: [new-resource-bundle, new-untranslated-folder]

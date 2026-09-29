@@ -1,0 +1,21 @@
+/content/documents/administration/faceted-segmentation/signedin:
+  .meta:order-before: day-of-the-week
+  jcr:primaryType: hippo:handle
+  jcr:mixinTypes: ['hippo:named', 'mix:referenceable']
+  jcr:uuid: c2db6686-8457-40a5-be31-8d04b63acef1
+  hippo:name: Signed In
+  /signedin:
+    jcr:primaryType: selection:valuelist
+    jcr:mixinTypes: ['hippotranslation:translated', 'mix:referenceable']
+    jcr:uuid: 5c3954ce-1753-4648-94e5-956370b974ab
+    hippo:availability: [live, preview]
+    hippotranslation:id: bbbc3913-10ab-4e9a-83eb-99b5e293b720
+    hippotranslation:locale: inherited - from query
+    /selection:listitem[1]:
+      jcr:primaryType: selection:listitem
+      selection:key: out
+      selection:label: Signed Out
+    /selection:listitem[2]:
+      jcr:primaryType: selection:listitem
+      selection:key: in
+      selection:label: Signed In

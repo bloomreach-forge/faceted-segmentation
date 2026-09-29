@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Registers the faceted segmentation plugin's facet catalog REST resource on the plain JAX-RS
+  pipeline. The plugin's own HST addon module (bloomreach-facetedsegmentation-hst) cannot do this
+  itself: HST loads each addon into its own CHILD Spring context, so the plain pipeline's
+  customRestPlainResourceProviders list (which lives in the ROOT context) cannot see beans defined
+  in the addon's context. See the plugin's own
+  META-INF/hst-assembly/addon/org/bloomreach/forge/facetedsegmentation/faceted-segmentation.xml for
+  the full explanation and the registration snippet this file follows.
+
+  Files matching META-INF/hst-assembly/overrides/*.xml are picked up automatically
+  (assembly.overrides in SpringComponentManager.properties); the filename itself is not
+  significant.
+
+  TWO THINGS HERE ARE LOAD-BEARING:
+
+  1. The <import>s. The JAX-RS pipelines are OPTIONAL — their Spring definitions live under
+     org/hippoecm/hst/site/optional/jaxrs/, outside the auto-scanned META-INF/hst-assembly tree, so
+     nothing loads them unless we do it here. Without these imports the beans below reference an
+     undefined pipeline and the webapp fails to start. The rest-jackson import is required too: the
+     plain pipeline references jaxrsRestAllEntityProviders, which that file provides.
+
+  2. Overriding customRestPlainResourceProviders. The plain pipeline declares this as an empty list
+     specifically to be overridden; it is then unioned with defaultRestPlainResourceProviders into
+     the list CXF's JAXRSServerFactoryBean consumes.
+
+  The mount that routes to this pipeline is in
+  repository-data/site/.../hcm-config/hst/hosts.yaml (hst:namedpipeline: JaxrsRestPlainPipeline).
+
+  Note this bean is a SEPARATE FacetCatalogResource instance from the one the plugin's own addon
+  module wires up (with its own reader, and therefore its own cache) — that instance lives in the
+  addon's child context and cannot be reached from here. Left unconfigured, both readers point at
+  the plugin's default path, /content/documents/administration/faceted-segmentation, which is where
+  the plugin's own bundled value lists (day-of-the-week, signedin, size) live — nothing to override
+  for this demo.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <import resource="classpath:/org/hippoecm/hst/site/optional/jaxrs/SpringComponentManager-rest-jackson.xml"/>
+  <import resource="classpath:/org/hippoecm/hst/site/optional/jaxrs/SpringComponentManager-rest-plain-pipeline.xml"/>
+
+  <bean id="org.example.rest.FacetCatalogResource"
+        class="org.bloomreach.forge.facetedsegmentation.catalog.FacetCatalogResource"/>
+
+  <bean id="customRestPlainResourceProviders" class="org.springframework.beans.factory.config.ListFactoryBean">
+    <property name="sourceList">
+      <list>
+        <bean class="org.apache.cxf.jaxrs.lifecycle.SingletonResourceProvider">
+          <constructor-arg ref="org.example.rest.FacetCatalogResource"/>
+        </bean>
+      </list>
+    </property>
+  </bean>
+
+</beans>

@@ -1,0 +1,21 @@
+<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!--
+      "Faceted Segmentation"
+      Designed for small scale (30x30) with bold geometry, abutting internal edges (zero gap to avoid heavy spacing), and a dynamic pulled-out segment.
+    -->
+
+    <!-- Center Core -->
+    <path d="M 11 8 L 16 13 L 11 18 L 6 13 Z" fill="#1e1b4b" />
+
+    <!-- Top-Left Facet -->
+    <path d="M 11 4 L 2 13 L 6 13 L 11 8 Z" fill="#6366f1" />
+
+    <!-- Bottom-Left Facet -->
+    <path d="M 2 13 L 11 22 L 11 18 L 6 13 Z" fill="#3b82f6" />
+
+    <!-- Bottom-Right Facet -->
+    <path d="M 11 22 L 20 13 L 16 13 L 11 18 Z" fill="#06b6d4" />
+
+    <!-- Top-Right Segment (Pulled out to illustrate "Segmentation") -->
+    <path d="M 13 2 L 13 6 L 18 11 L 22 11 Z" fill="#a855f7" />
+</svg>

@@ -1,0 +1,21 @@
+# See the comment on catalog.yaml for why `hst:default` is safe to bootstrap into and why
+# `hst:templates` is declared explicitly here rather than assumed to already exist.
+#
+# `hst:renderpath` supports a `classpath:` URI scheme (`HstClassTemplateLoader`, wired into
+# `HstFreemarkerServlet.createTemplateLoader` alongside the `jcr:`/`webfile:` loaders), which loads
+# the ftl straight off the classpath via `Class.getResource(...)` — no JCR import/bootstrap step at
+# all. That's a better fit here than `webfile:` would be: `webfile:` depends on a webfile *bundle*
+# (`hcm-config: webfilebundle`) actually being imported into `/webfiles/<bundle>` in the JCR, a
+# mechanism designed around a project owning one dedicated bundle, not a library module shipping a
+# single template alongside Java classes and other HCM definitions. `classpath:` needs none of
+# that — the ftl at `../../../../../freemarker/facetedsegmentation/facetedsegmentation.ftl` in this
+# jar is resolved directly as long as the jar is on the site webapp's classpath, which it already
+# is (it's where FacetedSegmentationComponent itself loads from). A project that subclasses the
+# component (see ../hst/README.md) should still copy the ftl and point its own template at the
+# copy, since the bean types/query/rootPath baked into this one are the generic, non-subclassed
+# defaults.
+definitions:
+  config:
+    /hst:hst/hst:configurations/hst:default/hst:templates/faceted-segmentation:
+      jcr:primaryType: hst:template
+      hst:renderpath: classpath:/freemarker/facetedsegmentation/facetedsegmentation.ftl

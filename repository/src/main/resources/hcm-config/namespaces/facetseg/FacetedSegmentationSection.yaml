@@ -1,0 +1,106 @@
+# The plugin's section compound: one rich-text body plus one segmentation rule.
+#
+# A consuming project composes this into its own document type, e.g. in its own namespace YAML:
+#
+#   /sections:
+#     jcr:primaryType: hipposysedit:field
+#     hipposysedit:path: myns:sections
+#     hipposysedit:type: facetseg:FacetedSegmentationSection
+#     hipposysedit:multiple: true
+#     hipposysedit:ordered: true
+#
+# Because the type is owned by the plugin, the project inherits the Open UI field wiring
+# (`ui.extension: facetedSegmentation`) automatically — there is nothing to copy and nothing to keep
+# in sync when the plugin is upgraded.
+#
+# `hippostd:relaxed` (see facetseg.cnd) means a project may add its own properties to a section
+# without redefining the type.
+definitions:
+  config:
+    /hippo:namespaces/facetseg/FacetedSegmentationSection:
+      jcr:primaryType: hipposysedit:templatetype
+      jcr:mixinTypes: ['editor:editable', 'mix:referenceable']
+      jcr:uuid: 3fd7855a-88a5-4a48-905b-190265d8c1a4
+      /hipposysedit:nodetype:
+        jcr:primaryType: hippo:handle
+        jcr:mixinTypes: ['mix:referenceable']
+        jcr:uuid: 2137685c-0abe-4f98-b8dd-0c84f634534e
+        /hipposysedit:nodetype:
+          jcr:primaryType: hipposysedit:nodetype
+          jcr:mixinTypes: ['mix:referenceable', 'hipposysedit:remodel']
+          jcr:uuid: 15314464-c5b1-4b43-9ead-c2079d0bef85
+          hipposysedit:node: true
+          hipposysedit:supertype: ['hippo:compound', 'hippostd:relaxed']
+          hipposysedit:uri: http://www.bloomreach.org/forge/facetedsegmentation/nt/1.0
+          /content:
+            jcr:primaryType: hipposysedit:field
+            hipposysedit:mandatory: false
+            hipposysedit:multiple: false
+            hipposysedit:ordered: false
+            hipposysedit:path: facetseg:content
+            hipposysedit:primary: false
+            hipposysedit:type: hippostd:html
+          /faceted_segmentation:
+            jcr:primaryType: hipposysedit:field
+            hipposysedit:mandatory: false
+            hipposysedit:multiple: false
+            hipposysedit:ordered: false
+            hipposysedit:path: facetseg:faceted_segmentation
+            hipposysedit:primary: false
+            # The Open UI String field type is what lets a custom iframe render in place of a plain
+            # text input. The extension itself is selected by `ui.extension` in the editor template
+            # below.
+            hipposysedit:type: OpenUiString
+            # A section without a facet definition would otherwise "match" every visitor (an empty
+            # rule is indistinguishable, at the storage level, from a deliberately ungated one) — but
+            # ungated content belongs in PersonalizedContent's `public` field, not in a section.
+            # `non-empty`/`required` are the built-in validators shipped with brXM's validation
+            # service (org.onehippo.cms.services.validation.validator.{NonEmptyValidator,
+            # RequiredStringValidator}); they block save/publish in both the classic CMS editor and
+            # the Channel Manager without any custom validator class. This is a backstop alongside
+            # FacetedSegmentationComponent#matches(), which already treats a blank expression as a
+            # non-match rather than an automatic one.
+            hipposysedit:validators: [non-empty, required]
+      /hipposysedit:prototypes:
+        jcr:primaryType: hipposysedit:prototypeset
+        /hipposysedit:prototype:
+          jcr:primaryType: facetseg:FacetedSegmentationSection
+          # Starts empty so the editor is prompted to define a facet rule; the non-empty/required
+          # validators above block saving the section until one is set. To show content to
+          # everyone, use PersonalizedContent's `public` field instead of a section.
+          facetseg:faceted_segmentation: ''
+          /facetseg:content:
+            jcr:primaryType: hippostd:html
+            hippostd:content: ''
+      /editor:templates:
+        jcr:primaryType: editor:templateset
+        /_default_:
+          jcr:primaryType: frontend:plugincluster
+          frontend:properties: [mode]
+          frontend:references: [wicket.model, model.compareTo, engine, validator.id]
+          frontend:services: [wicket.id, validator.id]
+          /root:
+            jcr:primaryType: frontend:plugin
+            item: ${cluster.id}.field
+            plugin.class: org.hippoecm.frontend.service.render.ListViewPlugin
+          /faceted_segmentation:
+            jcr:primaryType: frontend:plugin
+            caption: Faceted Segmentation
+            field: faceted_segmentation
+            hint: Personalized segment rule for this content section.
+            plugin.class: org.hippoecm.frontend.editor.plugins.field.PropertyFieldPlugin
+            wicket.id: ${cluster.id}.field
+            /cluster.options:
+              jcr:primaryType: frontend:pluginconfig
+              # Selects the Open UI extension BY NODE NAME. Must match the frontend:uiExtension node
+              # in hcm-config/configuration/frontend/cms/ui-extensions.yaml — if it does not, the
+              # field silently renders as a plain text input.
+              ui.extension: facetedSegmentation
+          /content:
+            jcr:primaryType: frontend:plugin
+            caption: Content
+            field: content
+            plugin.class: org.hippoecm.frontend.editor.plugins.field.NodeFieldPlugin
+            wicket.id: ${cluster.id}.field
+            /cluster.options:
+              jcr:primaryType: frontend:pluginconfig

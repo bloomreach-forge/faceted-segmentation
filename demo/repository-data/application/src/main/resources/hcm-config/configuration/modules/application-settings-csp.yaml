@@ -1,0 +1,56 @@
+# Content Security Policy additions for the faceted segmentation Open UI extension.
+#
+# CSP is enabled by default from brXM 15.0.0. An extension served from an origin other than the
+# CMS is BLOCKED until that origin is listed here, and the failure modes are quiet:
+#
+#   frame-src missing    -> the iframe does not load; the field area is empty
+#   connect-src missing  -> the field renders FINE and then the catalog silently fails to load
+#                           (the extension surfaces this as a visible error rather than an empty
+#                           facet list, but the browser console is where the CSP violation shows)
+#
+# `operation: add` APPENDS to the platform's existing values rather than replacing them. The
+# platform ships a populated list in community/cms/config's application-settings-module.yaml
+# (auth0, tools.bloomreach.com, userguiding, datadog, ...); a plain definition on these
+# properties would WIPE those and break unrelated CMS features.
+#
+# Value format follows the platform's own defaults: bare host[:port], no scheme, no quoted 'self'.
+#
+# LOCAL DEVELOPMENT VALUES. Replace with the real hosted origins per environment:
+#   localhost:5173  the Vite dev server (frontend:url), IF running the extension locally.
+#                   The plugin's own frontend:config in repository/.../ui-extensions.yaml instead
+#                   defaults frontend:url to the same-origin path /facetedsegmentation/index.html,
+#                   which needs no frame-src entry at all — this is only needed when overriding
+#                   that to point at a separately hosted build.
+#   localhost:8080  the site webapp serving /site/api/facets                -> connect-src
+#
+# Note localhost:8080 is the CMS's OWN origin, so `self` may already cover the catalog fetch and
+# this connect-src entry may be redundant locally. It is listed explicitly because (a) it is
+# harmless, and (b) in any real deployment the site webapp is a different origin from the CMS, so
+# the entry is genuinely required there — leaving it out locally would hide that.
+definitions:
+  config:
+    /hippo:configuration/hippo:modules/application-settings/hippo:moduleconfig/content-security-policy:
+      # NOTE: jcr:primaryType is deliberately NOT declared here.
+      #
+      # The platform's own module already defines this node and its primary type. Re-declaring
+      # jcr:primaryType from a second module fails config apply outright:
+      #
+      #   IllegalStateException: Property jcr:primaryType is already defined on node
+      #   .../content-security-policy as determined by [hippo-cms-config], but change is
+      #   requested in [myproject-repository-data-application]. Use 'operation: override' if
+      #   you really intend to change the value of this property.
+      #
+      # We are only APPENDING to two existing multi-valued properties, so the node's type is
+      # none of our business — omit it and let the platform own it. Do not "fix" this by adding
+      # operation: override either; that would take ownership of a platform node's type for no
+      # reason.
+      #
+      # For the record, in the deployed 17.2.0 artifact the type is nt:unstructured. Do not
+      # trust a brxm source checkout for this — a newer branch declares
+      # frontend:contentSecurityPolicy instead, and using that value here produces the error above.
+      frame-src:
+        operation: add
+        value: ['localhost:5173']
+      connect-src:
+        operation: add
+        value: ['localhost:8080']

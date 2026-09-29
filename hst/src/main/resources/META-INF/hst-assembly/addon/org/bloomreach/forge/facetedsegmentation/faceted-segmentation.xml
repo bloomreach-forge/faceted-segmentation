@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2026 Bloomreach
+
+  Licensed under the Apache License, Version 2.0 (the  "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS"
+  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <!--
+    Where the plugin looks for value lists. Each selection:valuelist directly in this folder becomes
+    one facet; the scan is NOT recursive, so pointing this at a dedicated subfolder is how a project
+    scopes which of its value lists are offered as facets.
+
+    To change it, a project drops a file at
+      META-INF/hst-assembly/overrides/addon/org/bloomreach/forge/facetedsegmentation/*.xml
+    redefining `facetedSegmentationValueListsPath` (or the reader bean itself).
+  -->
+  <bean id="facetedSegmentationValueListsPath" class="java.lang.String">
+    <constructor-arg type="java.lang.String" value="/content/documents/administration/faceted-segmentation"/>
+  </bean>
+
+  <!-- How long a read is served before the repository is re-read. -->
+  <bean id="facetedSegmentationCacheTtlSeconds" class="java.lang.Long">
+    <constructor-arg type="java.lang.String" value="900"/>
+  </bean>
+
+  <!--
+    ONE reader, shared by the REST endpoint and the delivery-tier component, so there is a single
+    cache rather than one per consumer. A document with N sections mounts N authoring-field instances,
+    each of which fetches the catalog — an uncached read per interaction is not viable.
+  -->
+  <bean id="org.bloomreach.forge.facetedsegmentation.catalog.ValueListCatalogReader"
+        class="org.bloomreach.forge.facetedsegmentation.catalog.ValueListCatalogReader">
+    <constructor-arg index="0" value="#{facetedSegmentationValueListsPath}"/>
+    <constructor-arg index="1" value="#{facetedSegmentationCacheTtlSeconds}"/>
+  </bean>
+
+  <!--
+    Publish the reader for HST components, which are instantiated by HST and are therefore not Spring
+    beans and cannot be injected. See CatalogReaderHolder for why this bridge exists.
+  -->
+  <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+    <property name="targetClass" value="org.bloomreach.forge.facetedsegmentation.catalog.CatalogReaderHolder"/>
+    <property name="targetMethod" value="set"/>
+    <property name="arguments">
+      <list>
+        <ref bean="org.bloomreach.forge.facetedsegmentation.catalog.ValueListCatalogReader"/>
+      </list>
+    </property>
+  </bean>
+
+  <!--
+    The facet catalog REST resource.
+
+    IMPORTANT — this bean alone does not expose the endpoint. HST loads each addon module into its own
+    child Spring context, so the plain-JAX-RS pipeline's `customRestPlainResourceProviders` list
+    (which lives in the ROOT context) cannot see beans defined here. Registering the resource is
+    therefore a one-time step the consuming project performs, in its own
+    META-INF/hst-assembly/overrides/*.xml, referencing this bean out of this module:
+
+      <bean id="customRestPlainResourceProviders"
+            class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+          <list>
+            <bean class="org.apache.cxf.jaxrs.lifecycle.SingletonResourceProvider">
+              <constructor-arg>
+                <bean class="org.bloomreach.forge.facetedsegmentation.catalog.FacetCatalogResource">
+                  <property name="valueListsPath" value="/content/documents/.../value-lists"/>
+                </bean>
+              </constructor-arg>
+            </bean>
+          </list>
+        </property>
+      </bean>
+
+    The project also needs a mount with `hst:namedpipeline: JaxrsRestPlainPipeline` to route requests
+    to it. Both steps are in this module's own README.md (bloomreach-facetedsegmentation-hst/README.md),
+    which also covers the component's catalog/template registration — none of it is bootstrapped by
+    this module, and why is explained there.
+
+    The bean below exists so a project that *does* share this module's context (or looks it up via
+    getComponent(name, "org.bloomreach.forge.facetedsegmentation.hst")) gets one already wired to the
+    shared reader.
+  -->
+  <bean id="org.bloomreach.forge.facetedsegmentation.catalog.FacetCatalogResource"
+        class="org.bloomreach.forge.facetedsegmentation.catalog.FacetCatalogResource">
+    <property name="reader" ref="org.bloomreach.forge.facetedsegmentation.catalog.ValueListCatalogReader"/>
+  </bean>
+
+</beans>

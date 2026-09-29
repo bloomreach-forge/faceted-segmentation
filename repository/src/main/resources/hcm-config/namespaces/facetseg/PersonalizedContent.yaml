@@ -1,0 +1,79 @@
+definitions:
+  config:
+    /hippo:namespaces/facetseg/PersonalizedContent:
+      jcr:primaryType: hipposysedit:templatetype
+      jcr:mixinTypes: ['editor:editable', 'mix:referenceable']
+      jcr:uuid: 601829b8-0d9b-4be1-a540-f0e2ffeeb76a
+      /hipposysedit:nodetype:
+        jcr:primaryType: hippo:handle
+        jcr:mixinTypes: ['mix:referenceable']
+        jcr:uuid: 79c33dd4-5dc0-42c5-87f7-c314671ad9fb
+        /hipposysedit:nodetype:
+          jcr:primaryType: hipposysedit:nodetype
+          jcr:mixinTypes: ['mix:referenceable', 'hipposysedit:remodel']
+          jcr:uuid: 16686ee8-a4e7-432d-ae8f-82b5e61f174d
+          hipposysedit:node: true
+          hipposysedit:supertype: ['facetseg:basedocument', 'hippostd:relaxed', 'hippotranslation:translated']
+          hipposysedit:uri: http://www.bloomreach.org/forge/facetedsegmentation/nt/1.0
+          /public:
+            jcr:primaryType: hipposysedit:field
+            hipposysedit:mandatory: false
+            hipposysedit:multiple: false
+            hipposysedit:ordered: false
+            hipposysedit:path: facetseg:public
+            hipposysedit:primary: false
+            hipposysedit:type: hippostd:html
+          /FacetedSegmentationSection:
+            jcr:primaryType: hipposysedit:field
+            hipposysedit:mandatory: false
+            hipposysedit:multiple: true
+            hipposysedit:ordered: true
+            hipposysedit:path: facetseg:FacetedSegmentationSection
+            hipposysedit:primary: false
+            hipposysedit:type: facetseg:FacetedSegmentationSection
+      /hipposysedit:prototypes:
+        jcr:primaryType: hipposysedit:prototypeset
+        /hipposysedit:prototype:
+          jcr:primaryType: facetseg:PersonalizedContent
+          hippostd:holder: holder
+          hippostd:state: draft
+          hippostdpubwf:createdBy: ''
+          hippostdpubwf:lastModifiedBy: ''
+          hippotranslation:id: document-type-locale-id
+          hippotranslation:locale: document-type-locale
+          jcr:mixinTypes: ['mix:referenceable']
+          jcr:uuid: decb670c-ce0c-4a35-a151-78c152f1a708
+          hippostdpubwf:lastModificationDate: 2026-09-23T15:13:38.817-04:00
+          hippostdpubwf:creationDate: 2026-09-23T15:13:38.817-04:00
+          /facetseg:public:
+            jcr:primaryType: hippostd:html
+            hippostd:content: ''
+      /editor:templates:
+        jcr:primaryType: editor:templateset
+        /_default_:
+          jcr:primaryType: frontend:plugincluster
+          frontend:properties: [mode]
+          frontend:references: [wicket.model, model.compareTo, engine, validator.id]
+          frontend:services: [wicket.id, validator.id]
+          /root:
+            jcr:primaryType: frontend:plugin
+            item: ${cluster.id}.field
+            plugin.class: org.hippoecm.frontend.service.render.ListViewPlugin
+          /public:
+            jcr:primaryType: frontend:plugin
+            caption: Public Content
+            field: public
+            hint: Content shown when a user does not match any of the faceted segmentation
+              sections below.
+            plugin.class: org.hippoecm.frontend.editor.plugins.field.NodeFieldPlugin
+            wicket.id: ${cluster.id}.field
+            /cluster.options:
+              jcr:primaryType: frontend:pluginconfig
+          /FacetedSegmentationSection:
+            jcr:primaryType: frontend:plugin
+            caption: Faceted Segmentation Section
+            field: FacetedSegmentationSection
+            plugin.class: org.hippoecm.frontend.editor.plugins.field.NodeFieldPlugin
+            wicket.id: ${cluster.id}.field
+            /cluster.options:
+              jcr:primaryType: frontend:pluginconfig

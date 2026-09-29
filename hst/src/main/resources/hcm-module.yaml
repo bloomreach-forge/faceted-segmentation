@@ -1,0 +1,25 @@
+# Bootstraps this plugin's HST catalog entry and template registration.
+#
+# Both are written into `/hst:hst/hst:configurations/hst:default`, not a project-specific
+# configuration node. `hst:default` is a reserved node name special-cased by the HST engine itself
+# (`HstNodeTypes.NODENAME_HST_HSTDEFAULT`): any configuration under `hst:configurations` literally
+# named `hst:default` is implicitly inherited by every other configuration, with no
+# `hst:inheritsfrom` needed from the project side. That is what makes bootstrapping into it safe —
+# unlike `hst:configurations/common`, it is not a node a project creates itself (see the two
+# abandoned attempts recorded in ../hst/README.md), so there is no undefined ordering between this
+# plugin's group and the project's.
+#
+# The remaining ordering problem is getting this module applied only after `/hst:hst` itself
+# exists. Solved the same way other onehippo/Bloomreach forge plugins that bootstrap HST
+# configuration solve it (e.g. hippo-plugin-sitemap-hcm-site, hippo-plugin-poll-addon-hcm-site):
+# join `group: hippo-cms` directly instead of this plugin's own `bloomreach-forge` group (used by
+# ../repository, which only touches CMS-side namespaces/content and has no such dependency), and
+# order this *project* `after: hippo-site-toolkit` — the project, within that same group, that
+# creates `/hst:hst`. Ordering between projects in the same group is well-defined; ordering between
+# groups is not, which is why this can't just be `group: bloomreach-forge, after: hippo-cms`.
+group: hippo-cms
+project:
+  name: bloomreach-facetedsegmentation
+  after: hippo-site-toolkit
+module:
+  name: bloomreach-facetedsegmentation-hst

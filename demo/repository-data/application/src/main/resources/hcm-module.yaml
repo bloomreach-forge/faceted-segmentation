@@ -1,0 +1,9 @@
+# after: bloomreach-forge ensures the plugin's namespace (facetseg:) and its bundled value lists
+# exist before this module applies content that depends on them (facetseg:PersonalizedContent
+# documents, the facetseg namespace registration itself).
+group:
+  name: myproject
+  after: [hippo-cms, bloomreach-forge]
+project: myproject
+module:
+  name: myproject-repository-data-application

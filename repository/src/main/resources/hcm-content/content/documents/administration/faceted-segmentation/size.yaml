@@ -1,0 +1,25 @@
+/content/documents/administration/faceted-segmentation/size:
+  .meta:order-before: signedin
+  jcr:primaryType: hippo:handle
+  jcr:mixinTypes: ['hippo:named', 'mix:referenceable']
+  jcr:uuid: e65a193a-96aa-48c0-b5d4-1f4dd654eae6
+  hippo:name: Size
+  /size:
+    jcr:primaryType: selection:valuelist
+    jcr:mixinTypes: ['hippotranslation:translated', 'mix:referenceable']
+    jcr:uuid: bd4fb413-1d28-4506-8167-f7fdda5b5a4c
+    hippo:availability: [live, preview]
+    hippotranslation:id: daf6b4ae-df5e-4717-a942-0816f4d3194b
+    hippotranslation:locale: inherited - from query
+    /selection:listitem[1]:
+      jcr:primaryType: selection:listitem
+      selection:key: S
+      selection:label: Small
+    /selection:listitem[2]:
+      jcr:primaryType: selection:listitem
+      selection:key: M
+      selection:label: Medium
+    /selection:listitem[3]:
+      jcr:primaryType: selection:listitem
+      selection:key: L
+      selection:label: Large
