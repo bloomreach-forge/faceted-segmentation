@@ -23,14 +23,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hippoecm.hst.component.support.bean.BaseHstComponent;
-import org.hippoecm.hst.content.beans.ObjectBeanManagerException;
 import org.hippoecm.hst.content.beans.standard.HippoBean;
 import org.hippoecm.hst.core.component.HstComponentException;
 import org.hippoecm.hst.core.component.HstRequest;
 import org.hippoecm.hst.core.component.HstResponse;
 import org.hippoecm.hst.core.parameters.ParametersInfo;
 import org.hippoecm.hst.core.request.HstRequestContext;
+import org.onehippo.cms7.essentials.components.EssentialsDocumentComponent;
 import org.bloomreach.forge.facetedsegmentation.catalog.CatalogReaderHolder;
 import org.bloomreach.forge.facetedsegmentation.catalog.ValueListCatalogReader;
 import org.bloomreach.forge.facetedsegmentation.expression.AbsentFacetPolicy;
@@ -85,7 +84,7 @@ import org.slf4j.LoggerFactory;
  * need no infrastructure and make the behavior directly testable from a browser.
  */
 @ParametersInfo(type = FacetedSegmentationInfo.class)
-public class FacetedSegmentationComponent extends BaseHstComponent {
+public class FacetedSegmentationComponent extends EssentialsDocumentComponent {
 
     private static final Logger log = LoggerFactory.getLogger(FacetedSegmentationComponent.class);
 
@@ -126,22 +125,13 @@ public class FacetedSegmentationComponent extends BaseHstComponent {
         }
 
         final HstRequestContext context = request.getRequestContext();
-        // The picker stores an absolute JCR path (e.g. "/content/documents/..."), so it must be
-        // resolved via the object bean manager rather than HippoBean#getBean, which treats its
-        // argument as relative to the bean it is called on.
-        final HippoBean document;
-        try {
-            document = (HippoBean) context.getObjectBeanManager().getObject(info.getDocument());
-        } catch (final ObjectBeanManagerException e) {
-            log.warn("Could not resolve document at '{}' — check the component's configuration.",
-                    info.getDocument(), e);
-            return;
-        }
+        // super.doBeforeRender() already resolved the configured path (relative to the channel's
+        // content root) and put the bean on the request under ATTRIBUTE_DOCUMENT.
+        final HippoBean document = (HippoBean) request.getAttribute(ATTRIBUTE_DOCUMENT);
         if (document == null) {
             log.warn("No document found at '{}' — check the component's configuration.", info.getDocument());
             return;
         }
-        request.setAttribute(ATTRIBUTE_DOCUMENT, document);
 
         final ValueListCatalogReader.Facets facets;
         try {

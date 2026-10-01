@@ -18,6 +18,7 @@ package org.bloomreach.forge.facetedsegmentation.component;
 import org.hippoecm.hst.core.parameters.DropDownList;
 import org.hippoecm.hst.core.parameters.JcrPath;
 import org.hippoecm.hst.core.parameters.Parameter;
+import org.onehippo.cms7.essentials.components.EssentialsDocumentComponent;
 
 /**
  * Channel-Manager parameters for {@link FacetedSegmentationComponent}.
@@ -25,11 +26,13 @@ import org.hippoecm.hst.core.parameters.Parameter;
 public interface FacetedSegmentationInfo {
 
     /**
-     * The document whose faceted segmentation sections this component renders. Left unrestricted
-     * here; a project should override to pin {@code pickerSelectableNodeTypes} to its own type.
+     * The document whose faceted segmentation sections this component renders, relative to the
+     * channel's content root — the convention {@link EssentialsDocumentComponent} resolves it
+     * under. Left unrestricted here; a project should override to pin {@code pickerSelectableNodeTypes}
+     * to its own type.
      */
     @Parameter(name = "document", required = true, displayName = "Document")
-    @JcrPath(pickerConfiguration = "cms-pickers/documents-only")
+    @JcrPath(isRelative = true, pickerConfiguration = "cms-pickers/documents-only")
     String getDocument();
 
     /**

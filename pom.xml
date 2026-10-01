@@ -172,6 +172,13 @@
         <version>${hippo.release.version}</version>
         <scope>provided</scope>
       </dependency>
+      <!-- CommonComponent / EssentialsDocumentComponent, the Essentials base classes for an HST component. -->
+      <dependency>
+        <groupId>org.onehippo.cms7</groupId>
+        <artifactId>hippo-essentials-components-hst</artifactId>
+        <version>${hippo.release.version}</version>
+        <scope>provided</scope>
+      </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
