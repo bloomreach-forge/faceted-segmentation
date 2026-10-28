@@ -4,6 +4,5 @@
   hst:iconpath: images/facetedsegmentationplugin/facetedsegmentation.svg
   hst:label: Faceted Segmentation
   hst:parameternames: [absentFacetPolicy, document, previewModeQueryParams]
-  hst:parametervalues: [strict, /content/documents/myproject/personalized-content/personalized-content-1,
-    day-of-the-week=friday&signedin=in]
+  hst:parametervalues: [strict, personalized-content/personalized-content-1, day-of-the-week=friday&signedin=in]
   hst:template: faceted-segmentation

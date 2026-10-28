@@ -167,12 +167,20 @@ contains no mode logic of its own:
 |---|---|---|
 | `document` | `HippoBean` | The configured document. |
 | `matchedSections` | `List<HippoBean>` | Every section that matched, in order. Empty if none. |
-| `matchedSection` | `HippoBean` | The first match, or null. Retained for templates written against a single section. |
 | `renderPublicContent` | `Boolean` | Whether the template should also render public content. |
 | `audience` | `Audience` | The resolved facet values, for debugging. |
 
 Because the component resolves `renderPublicContent` itself, a custom template never needs to read
 either parameter: loop `matchedSections`, and honour `renderPublicContent`.
+
+A template that only ever renders one section takes the first item explicitly:
+
+```ftl
+<#if matchedSections?has_content>
+  <#assign section = matchedSections?first>
+  ...
+</#if>
+```
 
 ## Building
 

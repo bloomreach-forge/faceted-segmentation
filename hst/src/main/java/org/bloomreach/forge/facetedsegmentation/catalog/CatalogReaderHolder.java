@@ -26,7 +26,7 @@ package org.bloomreach.forge.facetedsegmentation.catalog;
  * and components look it up.
  *
  * <p>Deliberately a plain static holder rather than a service-registry lookup: there is exactly one
- * reader per site webapp, it is set once during Spring context initialisation and never reassigned at
+ * reader per site webapp, it is set once during Spring context initialization and never reassigned at
  * request time, so the visibility guarantee of {@code volatile} is sufficient and a heavier mechanism
  * would buy nothing.
  */

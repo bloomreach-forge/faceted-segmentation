@@ -48,40 +48,16 @@ import org.slf4j.LoggerFactory;
  * Request Contributions:
  * document — the configured document bean.
  * matchedSections — every section that matched, in stored order. Empty if none did.
- * matchedSection — the first matched section, or null. Kept for templates that expect one section.
  * renderPublicContent — whether the template should also render the document's public content.
  * audience — the resolved facet values, for debugging a template.
  *
- * Section Ordering:
- * Sections are always evaluated in stored order, so a CMS user reorders them to change the outcome.
- * How many may win is the {@code sectionMatchMode} parameter:
- *
- * first-match — stop at the earliest match. Order is priority, and at most one section renders.
- * all-matches — evaluate every section and keep all that pass. Order is presentation order only.
- *
- * Whether public content still renders is the separate {@code publicContentMode} parameter:
- *
- * fallback — public content is the ungated alternative, rendered only when nothing matched.
- * always   — public content is a preamble, rendered regardless of what matched.
- *
- * The two are deliberately independent: "how many sections win" and "is public content an
- * alternative or a preamble" are different questions, and projects answer them differently.
- *
- * Facet Values:
- * This implementation reads them from query parameters, keyed by facet id with value keys.
- * e.g. ?day-of-the-week=monday&signedin=in&size=M
- *
- * In the Experience Manager's preview — where the page is rendered inside a CMS-controlled iframe
- * and an author has no way to attach query parameters to it — the real request's query string is
- * ignored and the {@code previewModeQueryParams} component parameter is parsed instead, using that
- * same {@code key=value&key=value} shape. This lets an author preview each section by editing that
- * parameter rather than the (unreachable) URL.
- *
  * The audience is deliberately one per request, not one per component instance.
- * A real deployment usually has an identity or entitlement service instead. To integrate one,
- * subclass and override {@link #resolveAudience(HstRequest, ValueListCatalogReader.Facets)}; nothing
- * else needs to change. Query parameters are a deliberate choice for a plugin default because they
+ *
+ * Query parameters are a deliberate choice as the plugin default because they
  * need no infrastructure and make the behavior directly testable from a browser.
+ *
+ * A real deployment may use an identity or entitlement service instead. To integrate one,
+ * subclass and override {@link #resolveAudience(HstRequest, ValueListCatalogReader.Facets)}.
  */
 @ParametersInfo(type = FacetedSegmentationInfo.class)
 public class FacetedSegmentationComponent extends EssentialsDocumentComponent {
@@ -90,29 +66,18 @@ public class FacetedSegmentationComponent extends EssentialsDocumentComponent {
 
     public static final String ATTRIBUTE_DOCUMENT = "document";
     public static final String ATTRIBUTE_MATCHED_SECTIONS = "matchedSections";
-    public static final String ATTRIBUTE_MATCHED_SECTION = "matchedSection";
     public static final String ATTRIBUTE_RENDER_PUBLIC_CONTENT = "renderPublicContent";
     public static final String ATTRIBUTE_AUDIENCE = "audience";
 
     /** {@code sectionMatchMode}: render every matching section rather than only the first. */
     private static final String MATCH_MODE_ALL = "all-matches";
-
     /** {@code publicContentMode}: render public content regardless of what matched. */
     private static final String PUBLIC_CONTENT_ALWAYS = "always";
-
-    /**
-     * The property holding a section's expression, relative to the section bean. Override
-     * {@link #getExpressionPropertyName()} if a project stores it under a different name.
-     */
+    /** The property holding a section's expression, relative to the section bean. */
     private static final String DEFAULT_EXPRESSION_PROPERTY = "facetseg:faceted_segmentation";
-
-    /**
-     * The child-node name of the sections on the document. Override {@link #getSectionNodeName()} for
-     * a project whose document composes the compound under a different name.
-     */
+    /** The child-node name of the sections on the document. */
     private static final String DEFAULT_SECTION_NODE_NAME = "facetseg:FacetedSegmentationSection";
 
-    @SuppressWarnings("SpellCheckingInspection")
     @Override
     public void doBeforeRender(final HstRequest request, final HstResponse response)
             throws HstComponentException {
@@ -125,8 +90,6 @@ public class FacetedSegmentationComponent extends EssentialsDocumentComponent {
         }
 
         final HstRequestContext context = request.getRequestContext();
-        // super.doBeforeRender() already resolved the configured path (relative to the channel's
-        // content root) and put the bean on the request under ATTRIBUTE_DOCUMENT.
         final HippoBean document = (HippoBean) request.getAttribute(ATTRIBUTE_DOCUMENT);
         if (document == null) {
             log.warn("No document found at '{}' — check the component's configuration.", info.getDocument());
@@ -138,12 +101,9 @@ public class FacetedSegmentationComponent extends EssentialsDocumentComponent {
             facets = getCatalogReader().read(context, false);
         } catch (final RuntimeException e) {
             // Without the catalog we cannot map request values onto expression tokens, so no rule can
-            // be satisfied. Fail closed: no section can win, so the caller falls back to public
-            // content — set the attribute to null explicitly rather than leaving it unset, so a
-            // template's null-check behaves identically whether nothing matched or the catalog failed.
+            // be satisfied. No section can win, so the caller falls back to public content.
             log.error("Could not read the facet catalog; falling back to public content.", e);
             request.setAttribute(ATTRIBUTE_MATCHED_SECTIONS, List.of());
-            request.setAttribute(ATTRIBUTE_MATCHED_SECTION, null);
             // Nothing can match, so public content must render whichever mode is configured —
             // otherwise a catalog outage would render an empty component.
             request.setAttribute(ATTRIBUTE_RENDER_PUBLIC_CONTENT, true);
@@ -175,9 +135,6 @@ public class FacetedSegmentationComponent extends EssentialsDocumentComponent {
                 PUBLIC_CONTENT_ALWAYS.equalsIgnoreCase(trimmed(info.getPublicContentMode()));
 
         request.setAttribute(ATTRIBUTE_MATCHED_SECTIONS, List.copyOf(matched));
-        // The single-section attribute stays populated so a template written against it keeps
-        // working; under all-matches it is the first of several, not the only one.
-        request.setAttribute(ATTRIBUTE_MATCHED_SECTION, matched.isEmpty() ? null : matched.get(0));
         request.setAttribute(ATTRIBUTE_RENDER_PUBLIC_CONTENT, publicAlways || matched.isEmpty());
         request.setAttribute(ATTRIBUTE_AUDIENCE, audience);
 
@@ -343,8 +300,8 @@ public class FacetedSegmentationComponent extends EssentialsDocumentComponent {
     }
 
     /**
-     * The shared catalog reader. Looked up from the HST component manager so the endpoint and the
-     * delivery tier share one cache; override in a subclass to supply one directly.
+     * The shared catalog reader.
+     * Looked up from the HST component manager so the endpoint and the delivery tier share one cache.
      */
     protected ValueListCatalogReader getCatalogReader() {
         final ValueListCatalogReader configured = CatalogReaderHolder.get();
