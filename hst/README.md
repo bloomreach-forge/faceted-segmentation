@@ -114,7 +114,7 @@ in your site components module, redefining the path bean:
 </beans>
 ```
 
-`facetedSegmentationCacheTtlSeconds` (default 900) can be overridden the same way.
+`facetedSegmentationCacheTtlSeconds` (default 300) can be overridden the same way.
 
 ### 2. Narrowing the document picker (optional)
 
@@ -171,6 +171,12 @@ the comment on `FacetCatalogResource`'s bean definition in
 
 The `<import>`s are required: the JAX-RS pipelines are optional and their Spring definitions live
 outside the auto-scanned `META-INF/hst-assembly` tree, so nothing loads them unless you do it here.
+
+Leave the `FacetCatalogResource` bean unconfigured, as above. It then reads through the same
+`ValueListCatalogReader` as the delivery-tier component, so **Resync facet values** in the field
+refreshes the page render as well. Setting `valueListsPath` or `ttlSeconds` on the resource itself
+gives it a private reader, and the page render then waits out its TTL after a resync. Configure the
+path with the `facetedSegmentationValueListsPath` bean (step 1) instead.
 
 **The mount** — add to your own `hcm-config/hst/hosts.yaml`, under every virtual host group/domain
 that needs it (local dev, staging, production — not just one):

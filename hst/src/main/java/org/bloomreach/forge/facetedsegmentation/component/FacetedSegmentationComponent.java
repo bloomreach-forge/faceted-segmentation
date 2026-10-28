@@ -301,7 +301,7 @@ public class FacetedSegmentationComponent extends EssentialsDocumentComponent {
 
     /**
      * The shared catalog reader.
-     * Looked up from the HST component manager so the endpoint and the delivery tier share one cache.
+     * Looked up from {@link CatalogReaderHolder} so the endpoint and the delivery tier share one cache.
      */
     protected ValueListCatalogReader getCatalogReader() {
         final ValueListCatalogReader configured = CatalogReaderHolder.get();

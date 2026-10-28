@@ -28,11 +28,13 @@
   repository-data/site/.../hcm-config/hst/hosts.yaml (hst:namedpipeline: JaxrsRestPlainPipeline).
 
   Note this bean is a SEPARATE FacetCatalogResource instance from the one the plugin's own addon
-  module wires up (with its own reader, and therefore its own cache) — that instance lives in the
-  addon's child context and cannot be reached from here. Left unconfigured, both readers point at
-  the plugin's default path, /content/documents/administration/faceted-segmentation, which is where
-  the plugin's own bundled value lists (day-of-the-week, signedin, size) live — nothing to override
-  for this demo.
+  module wires up — that instance lives in the addon's child context and cannot be reached from
+  here. Left unconfigured, this one still reads through the addon's shared reader (the same one the
+  delivery-tier component uses), so a resync from the field refreshes the page render too. Setting
+  valueListsPath or ttlSeconds on it would give it a private reader and lose that; override the
+  facetedSegmentationValueListsPath bean instead. The default path,
+  /content/documents/administration/faceted-segmentation, is where the plugin's own bundled value
+  lists (day-of-the-week, signedin, size) live — nothing to override for this demo.
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

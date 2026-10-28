@@ -436,7 +436,9 @@ keep that sustainable:
    serves every editor session, not just one document's fields.
 
 **Resync facet values** in the dialog clears layers 1 and 2 and forces a fresh fetch (`?refresh=true`),
-which also bypasses layer 3 on the server.
+which also bypasses layer 3 on the server. The page render reads through that same server cache, so
+it sees the new values immediately too — on the node that served the resync. Other cluster nodes
+pick them up when their own cache expires (5 minutes by default).
 
 **The `localStorage` key is a fixed string, not scoped by `catalogUrl` or deployment.** Two
 consequences:
