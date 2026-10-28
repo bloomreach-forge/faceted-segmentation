@@ -370,7 +370,7 @@ parentheses, `&`, `®` or `/`, nor a list of 50+ values. Tokenizing is covered d
 ```json
 {
   "catalogUrl": "${facetCatalog.url}",
-  "cacheTtlSeconds": 900,
+  "cacheTtlSeconds": 300,
   "dialogSize": "large",
   "absentFacetPolicy": "permissive",
   "facets": ["channel", "distribution", "license-state"]
@@ -429,7 +429,7 @@ keep that sustainable:
    one in-flight fetch and one result, so N sections don't each trigger their own request.
 2. **`localStorage`**, under the fixed key `brxm.facetedSegmentation.catalog.v1` — survives dialog
    open/close and page reloads, so reopening the dialog is instant. Served without a network call
-   whenever it is younger than `cacheTtlSeconds` (default 900s), and served **regardless of age**
+   whenever it is younger than `cacheTtlSeconds` (default 300s), and served **regardless of age**
    as a fallback if a live fetch then fails — see [Degraded vs.
    failed](#diagnosing-catalog-failures).
 3. **In-memory TTL cache** in the catalog service (Java, not the browser) — one repository read

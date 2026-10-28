@@ -18,14 +18,13 @@ package org.bloomreach.forge.facetedsegmentation.component;
 import org.hippoecm.hst.core.parameters.DropDownList;
 import org.hippoecm.hst.core.parameters.JcrPath;
 import org.hippoecm.hst.core.parameters.Parameter;
-import org.onehippo.cms7.essentials.components.EssentialsDocumentComponent;
 import org.onehippo.cms7.essentials.components.info.EssentialsDocumentComponentInfo;
 
 public interface FacetedSegmentationInfo extends EssentialsDocumentComponentInfo {
 
     /**
      * The document whose faceted segmentation sections this component renders.
-     * A project should override to pin {@code pickerSelectableNodeTypes) to its own type.
+     * A project should override to pin {@code pickerSelectableNodeTypes} to its own type.
      */
     @Override
     @Parameter(name = "document", required = true, displayName = "Document")

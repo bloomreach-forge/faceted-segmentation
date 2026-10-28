@@ -50,4 +50,4 @@ definitions:
       #                      or the builder's preview will disagree with what actually happens at
       #                      request time. The delivery tier is authoritative.
       #   facets             optional allow-list of value-list ids this field offers; omit for all.
-      frontend:config: '{"catalogUrl":"http://localhost:8080/site/api/facets","cacheTtlSeconds":900,"dialogSize":"large","absentFacetPolicy":"strict"}'
+      frontend:config: '{"catalogUrl":"http://localhost:8080/site/api/facets","cacheTtlSeconds":300,"dialogSize":"large","absentFacetPolicy":"strict"}'
