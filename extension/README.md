@@ -342,7 +342,7 @@ operator keyword. Full spec, including why that is safe for a label like
 npm test
 ```
 
-113 tests. Beyond unit coverage of the parser, formatter, evaluator and transforms,
+Beyond unit coverage of the parser, formatter, evaluator and transforms,
 `catalog-integration.test.ts` runs against the **generated catalog of the value lists the plugin
 ships** (3 facets, 12 values) and asserts:
 

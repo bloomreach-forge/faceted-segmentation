@@ -205,6 +205,13 @@
         <version>${junit-jupiter.version}</version>
         <scope>test</scope>
       </dependency>
+      <!-- MockHstRequest / MockHippoBean, for testing the component without a running HST. -->
+      <dependency>
+        <groupId>org.onehippo.cms7.hst</groupId>
+        <artifactId>hst-mock</artifactId>
+        <version>${hippo.release.version}</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

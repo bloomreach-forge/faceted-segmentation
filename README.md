@@ -169,6 +169,12 @@ contains no mode logic of its own:
 | `matchedSections` | `List<HippoBean>` | Every section that matched, in order. Empty if none. |
 | `renderPublicContent` | `Boolean` | Whether the template should also render public content. |
 | `audience` | `Audience` | The resolved facet values, for debugging. |
+| `evaluateOptions` | `EvaluateOptions` | The options the sections were evaluated with. For a subclass that calls `matches()` on beans of its own. |
+
+`audience` and `evaluateOptions` are set only when evaluation actually ran. If there's no document,
+or the catalog couldn't be read, both are absent, and a subclass should evaluate nothing.
+Substituting an empty audience is **not** safe: `NOT IN` passes for it under `permissive`, and a
+negated `IN` passes for it under either policy, so content would fail open.
 
 Because the component resolves `renderPublicContent` itself, a custom template never needs to read
 either parameter: loop `matchedSections`, and honour `renderPublicContent`.
@@ -200,7 +206,7 @@ For the Open UI extension:
 cd extension
 npm install
 npm run build                    # -> dist/, two entry points
-npm test                         # 113 tests
+npm test
 npm run dev                      # dev server on :5173
 ```
 
@@ -405,8 +411,7 @@ is legitimate and is left alone.
 
 ## Status
 
-Functionally complete and passing: 89 Java tests, 113 TypeScript tests, type-check, and production
-build. The demo renders end-to-end — drag the catalog item onto a page, and a `PersonalizedContent`
+Functionally complete. The demo renders end-to-end — drag the catalog item onto a page, and a `PersonalizedContent`
 document's sections are gated by their expressions.
 
 Before a first release:
@@ -414,9 +419,8 @@ Before a first release:
 - **Maven site** (`src/site/`) for publication to GitHub Pages, per the
   [Forge quality checklist](https://bloomreach-forge.github.io/checklist.html). Documentation is
   currently these READMEs, which the checklist does not accept as a substitute.
-- **Run it in a browser.** The build and test suites pass, but the two new
-  `sectionMatchMode` / `publicContentMode` parameters have not been exercised in a live CMS — only
-  in unit tests and a template-rendering harness.
+- **Run it in a browser.** The two new `sectionMatchMode` / `publicContentMode` parameters have not
+  been exercised in a live CMS — only in unit tests and a template-rendering harness.
 - **Version is `1.0.0-SNAPSHOT`.** Publishing to the Forge repository needs a release build, and
   only Bloomreach developers have write access there.
 
