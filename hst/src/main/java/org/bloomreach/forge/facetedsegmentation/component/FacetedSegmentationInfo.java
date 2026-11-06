@@ -68,7 +68,8 @@ public interface FacetedSegmentationInfo extends EssentialsDocumentComponentInfo
     String getPublicContentMode();
 
     /**
-     * Used exclusively in the Experience Manager to preview the component with different facet values.
+     * The facet values to use in preview, where authors can't add query parameters. Replaces the
+     * normal audience source there, including an overridden {@code resolveAudience}.
      */
     @Parameter(name = "previewModeQueryParams", defaultValue = "day-of-the-week=monday&signedin=in", displayName = "Preview mode query parameters")
     String getPreviewModeQueryParams();

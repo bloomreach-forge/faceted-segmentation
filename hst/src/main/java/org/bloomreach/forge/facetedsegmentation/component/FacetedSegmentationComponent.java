@@ -53,7 +53,8 @@ import org.slf4j.LoggerFactory;
  * evaluateOptions — the options the sections were evaluated with.
  *
  * Facet values come from query parameters by default, so rules can be tried from a browser. To use
- * another source, such as an identity service, override {@link #resolveAudience}.
+ * another source, such as an identity service, override {@link #resolveAudience}. In preview they
+ * always come from the {@code previewModeQueryParams} parameter.
  */
 @ParametersInfo(type = FacetedSegmentationInfo.class)
 public class FacetedSegmentationComponent extends EssentialsDocumentComponent {
@@ -114,7 +115,10 @@ public class FacetedSegmentationComponent extends EssentialsDocumentComponent {
             return;
         }
 
-        final Audience audience = resolveAudience(request, facets);
+        // Decided here rather than in resolveAudience, so preview keeps working when that's overridden.
+        final Audience audience = context.isPreview()
+                ? toAudience(parseQueryParams(info.getPreviewModeQueryParams()), facets)
+                : resolveAudience(request, facets);
         final EvaluateOptions options = EvaluateOptions.builder()
                 .absentFacetPolicy(resolvePolicy(info))
                 .build();
@@ -154,14 +158,20 @@ public class FacetedSegmentationComponent extends EssentialsDocumentComponent {
     }
 
     /**
-     * Turns the request into the set of facet values it carries.
-     * <p>Override this to source values from somewhere other than query parameters.
+     * The facet values of a live request. Override this to source them from somewhere other than
+     * query parameters. Not called in preview.
      */
     protected Audience resolveAudience(final HstRequest request,
                                        final ValueListCatalogReader.Facets facets) {
+        // The servlet request, because query parameters belong to the page, not the component.
+        return toAudience(request.getRequestContext().getServletRequest().getParameterMap(), facets);
+    }
+
+    /** Maps facet ids and value keys onto the display names and labels expressions use. */
+    private Audience toAudience(final Map<String, String[]> parameters,
+                                final ValueListCatalogReader.Facets facets) {
         final Audience.Builder builder = Audience.builder();
 
-        final Map<String, String[]> parameters = resolveRequestParameters(request);
         for (final Map.Entry<String, String[]> entry : parameters.entrySet()) {
             final String facetId = entry.getKey();
             final String displayName = facets.displayNameForId(facetId);
@@ -200,22 +210,6 @@ public class FacetedSegmentationComponent extends EssentialsDocumentComponent {
         }
 
         return builder.build();
-    }
-
-    /**
-     * The request's query parameters. In Experience Manager preview, where authors can't add query
-     * parameters, the component's {@code previewModeQueryParams} instead.
-     */
-    private Map<String, String[]> resolveRequestParameters(final HstRequest request) {
-        final HstRequestContext context = request.getRequestContext();
-        if (!context.isPreview()) {
-            // The servlet request, because query parameters belong to the page, not the component.
-            return context.getServletRequest().getParameterMap();
-        }
-
-        final FacetedSegmentationInfo info = getComponentParametersInfo(request);
-        final String rawQueryParams = info == null ? null : info.getPreviewModeQueryParams();
-        return parseQueryParams(rawQueryParams);
     }
 
     /** Parses a {@code key=value&key=value} string into a parameter map. */

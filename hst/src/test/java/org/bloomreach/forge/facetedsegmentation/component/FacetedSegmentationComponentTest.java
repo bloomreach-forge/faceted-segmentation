@@ -17,6 +17,7 @@ package org.bloomreach.forge.facetedsegmentation.component;
 
 import java.util.List;
 
+import org.bloomreach.forge.facetedsegmentation.catalog.FacetCatalog;
 import org.bloomreach.forge.facetedsegmentation.catalog.StubCatalogReader;
 import org.bloomreach.forge.facetedsegmentation.catalog.ValueListCatalogReader;
 import org.bloomreach.forge.facetedsegmentation.expression.AbsentFacetPolicy;
@@ -26,6 +27,7 @@ import org.hippoecm.hst.core.component.HstRequest;
 import org.hippoecm.hst.mock.content.beans.standard.MockHippoBean;
 import org.hippoecm.hst.mock.core.component.MockHstRequest;
 import org.hippoecm.hst.mock.core.container.MockComponentManager;
+import org.hippoecm.hst.mock.core.request.MockHstRequestContext;
 import org.hippoecm.hst.site.HstServices;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,8 +39,10 @@ import static org.bloomreach.forge.facetedsegmentation.component.FacetedSegmenta
 import static org.bloomreach.forge.facetedsegmentation.component.FacetedSegmentationComponent.ATTRIBUTE_MATCHED_SECTIONS;
 import static org.bloomreach.forge.facetedsegmentation.component.FacetedSegmentationComponent.ATTRIBUTE_RENDER_PUBLIC_CONTENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The request contract {@link FacetedSegmentationComponent} offers a subclass: which attributes are
@@ -60,9 +64,12 @@ class FacetedSegmentationComponentTest {
         HstServices.setComponentManager(null);
     }
 
+    private static final List<FacetCatalog.Facet> SIZE = List.of(new FacetCatalog.Facet(
+            "size", "Size", "/size", List.of(new FacetCatalog.FacetValue("s", "Small"))));
+
     @Test
     void publishesTheOptionsTheSectionsWereEvaluatedWith() {
-        final MockHstRequest request = requestWithDocument();
+        final MockHstRequest request = requestWithDocument(false);
 
         new TestComponent("permissive", StubCatalogReader.serving(List.of())).evaluateSections(request);
 
@@ -74,7 +81,7 @@ class FacetedSegmentationComponentTest {
 
     @Test
     void anUnrecognisedPolicyIsPublishedAsTheStrictFallback() {
-        final MockHstRequest request = requestWithDocument();
+        final MockHstRequest request = requestWithDocument(false);
 
         new TestComponent("permisive", StubCatalogReader.serving(List.of())).evaluateSections(request);
 
@@ -84,7 +91,7 @@ class FacetedSegmentationComponentTest {
 
     @Test
     void aCatalogOutageLeavesAudienceAndOptionsUnset() {
-        final MockHstRequest request = requestWithDocument();
+        final MockHstRequest request = requestWithDocument(false);
 
         new TestComponent("permissive", StubCatalogReader.failing()).evaluateSections(request);
 
@@ -97,6 +104,29 @@ class FacetedSegmentationComponentTest {
     }
 
     @Test
+    void aLiveRequestTakesItsAudienceFromResolveAudience() {
+        final MockHstRequest request = requestWithDocument(false);
+        final TestComponent component = new TestComponent("permissive", StubCatalogReader.serving(SIZE));
+
+        component.evaluateSections(request);
+
+        assertTrue(component.resolveAudienceCalled);
+        assertEquals(TestComponent.SOURCE_AUDIENCE, request.getAttribute(ATTRIBUTE_AUDIENCE));
+    }
+
+    @Test
+    void previewTakesItsAudienceFromPreviewParamsEvenWhenResolveAudienceIsOverridden() {
+        final MockHstRequest request = requestWithDocument(true);
+        final TestComponent component = new TestComponent("permissive", StubCatalogReader.serving(SIZE));
+
+        component.evaluateSections(request);
+
+        assertFalse(component.resolveAudienceCalled);
+        final Audience audience = (Audience) request.getAttribute(ATTRIBUTE_AUDIENCE);
+        assertEquals(List.of("Small"), audience.get("Size"));
+    }
+
+    @Test
     void aMissingDocumentLeavesAudienceAndOptionsUnset() {
         final MockHstRequest request = new MockHstRequest();
 
@@ -106,8 +136,14 @@ class FacetedSegmentationComponentTest {
         assertNull(request.getAttribute(ATTRIBUTE_EVALUATE_OPTIONS));
     }
 
-    private static MockHstRequest requestWithDocument() {
+    private static MockHstRequest requestWithDocument(final boolean preview) {
         final MockHstRequest request = new MockHstRequest();
+        request.setRequestContext(new MockHstRequestContext() {
+            @Override
+            public boolean isPreview() {
+                return preview;
+            }
+        });
         request.setAttribute(ATTRIBUTE_DOCUMENT, new SectionlessDocument());
         return request;
     }
@@ -115,8 +151,11 @@ class FacetedSegmentationComponentTest {
     /** Supplies parameters and the catalog directly, standing in for HST and the addon module. */
     private static final class TestComponent extends FacetedSegmentationComponent {
 
+        static final Audience SOURCE_AUDIENCE = Audience.builder().put("Size", "Small").build();
+
         private final FacetedSegmentationInfo info;
         private final ValueListCatalogReader reader;
+        boolean resolveAudienceCalled;
 
         TestComponent(final String absentFacetPolicy, final ValueListCatalogReader reader) {
             this.info = new FixedInfo(absentFacetPolicy);
@@ -134,11 +173,12 @@ class FacetedSegmentationComponentTest {
             return reader;
         }
 
-        /** The default reads query parameters off a live request context, which a mock lacks. */
+        /** Stands in for a project's own audience source. */
         @Override
         protected Audience resolveAudience(final HstRequest request,
                                            final ValueListCatalogReader.Facets facets) {
-            return Audience.empty();
+            resolveAudienceCalled = true;
+            return SOURCE_AUDIENCE;
         }
     }
 
@@ -147,7 +187,7 @@ class FacetedSegmentationComponentTest {
         @Override public String getAbsentFacetPolicy() { return absentFacetPolicy; }
         @Override public String getSectionMatchMode() { return "first-match"; }
         @Override public String getPublicContentMode() { return "fallback"; }
-        @Override public String getPreviewModeQueryParams() { return ""; }
+        @Override public String getPreviewModeQueryParams() { return "size=S"; }
     }
 
     /** Only the document's presence matters to these tests. */
