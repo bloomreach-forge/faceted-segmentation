@@ -31,8 +31,8 @@
 
   <name>Bloomreach Forge Faceted Segmentation Plugin</name>
   <description>
-    A brXM Open UI document field that replaces a wall of multi-select facet palettes with a single
-    readable boolean expression, plus the delivery-tier parser and evaluator that enforce it.
+    Personalizes sections of a document to audience facets: editors write one readable boolean rule
+    per section, and the site shows only the sections that match.
   </description>
   <url>https://github.com/bloomreach-forge/faceted-segmentation</url>
   <groupId>org.bloomreach.forge.facetedsegmentation</groupId>
