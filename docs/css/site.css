@@ -1,0 +1,17 @@
+/* Screenshots: shown small, linked to the full-size file. The height cap keeps tall shots, like a
+   whole document or a settings panel, from filling the screen. */
+#bodyColumn img {
+  display: block;
+  max-width: min(560px, 100%);
+  max-height: 490px;
+  width: auto;
+  height: auto;
+  margin: 1em 0;
+  border: 1px solid #ddd;
+}
+
+/* The skin sets code blocks in a proportional font, which breaks a rule's indentation. */
+#bodyColumn pre,
+#bodyColumn pre code {
+  font-family: Menlo, Consolas, "Liberation Mono", monospace;
+}
