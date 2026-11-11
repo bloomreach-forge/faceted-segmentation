@@ -419,7 +419,7 @@ Functionally complete. The demo renders end-to-end — drag the catalog item ont
 document's sections are gated by their expressions.
 
 Before a first release:
-  currently these READMEs, which the checklist does not accept as a substitute.
+
 - **Version is `1.0.0-SNAPSHOT`.** Publishing to the Forge repository needs a release build, and
   only Bloomreach developers have write access there.
 
