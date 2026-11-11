@@ -3,8 +3,7 @@
   jcr:mixinTypes: ['hippo:named', 'hippotranslation:translated', 'mix:versionable']
   jcr:uuid: 959102af-8eb9-4beb-b4fb-4f6d11c4f33e
   hippo:name: Personalized Content
-  hippostd:foldertype: [new-translated-folder, new-document, new-PersonalizedContent-document,
-    new-PersonalizedContent-folder]
+  hippostd:foldertype: [new-PersonalizedContent-document, new-PersonalizedContent-folder]
   hippostd:hasfolders: false
   hippotranslation:id: 0879000d-a07c-4a32-9be9-95229b4debf7
   hippotranslation:locale: en
@@ -13,7 +12,7 @@
     jcr:mixinTypes: ['hippo:named', 'hippo:versionInfo', 'mix:referenceable']
     jcr:uuid: 0f6f8435-fee3-455d-964e-ad79102e8419
     hippo:name: Personalized Content 1
-    hippo:versionHistory: 3ea89a09-eb24-4947-8089-f11aaeb4de4f
+    hippo:versionHistory: a3ab4bce-29fc-41c0-a4ac-206edf06d8ec
     /personalized-content-1[1]:
       jcr:primaryType: facetseg:PersonalizedContent
       jcr:mixinTypes: ['mix:referenceable']
@@ -24,7 +23,7 @@
       hippostd:transferable: false
       hippostdpubwf:createdBy: admin
       hippostdpubwf:creationDate: 2026-09-21T19:29:09.039-04:00
-      hippostdpubwf:lastModificationDate: 2026-09-25T18:40:52.282-04:00
+      hippostdpubwf:lastModificationDate: 2026-11-10T14:31:22.324-05:00
       hippostdpubwf:lastModifiedBy: admin
       hippotranslation:id: 62441804-f312-4063-915f-8dd0e8b792bf
       hippotranslation:locale: en
@@ -104,9 +103,11 @@
       hippostd:state: published
       hippostdpubwf:createdBy: admin
       hippostdpubwf:creationDate: 2026-09-21T19:29:09.039-04:00
+      hippostdpubwf:depublicationDate: 2026-11-10T13:59:10.614-05:00
+      hippostdpubwf:depublishedBy: admin
       hippostdpubwf:lastModificationDate: 2026-09-25T00:32:48.953-04:00
       hippostdpubwf:lastModifiedBy: admin
-      hippostdpubwf:publicationDate: 2026-09-25T00:32:51.988-04:00
+      hippostdpubwf:publicationDate: 2026-11-10T13:59:15.118-05:00
       hippostdpubwf:publishedBy: admin
       hippotranslation:id: 62441804-f312-4063-915f-8dd0e8b792bf
       hippotranslation:locale: en
@@ -150,9 +151,10 @@
       hippo:availability: []
       hippostd:retainable: false
       hippostd:state: draft
+      hippostd:transferable: false
       hippostdpubwf:createdBy: admin
       hippostdpubwf:creationDate: 2026-09-21T19:30:08.937-04:00
-      hippostdpubwf:lastModificationDate: 2026-09-24T02:05:35.282-04:00
+      hippostdpubwf:lastModificationDate: 2026-11-09T10:44:50.945-05:00
       hippostdpubwf:lastModifiedBy: admin
       hippotranslation:id: 830a12d0-0c7f-4d9e-80b1-2ace8d7be3d9
       hippotranslation:locale: en
@@ -248,10 +250,9 @@
       hippo:availability: []
       hippostd:retainable: false
       hippostd:state: draft
-      hippostd:transferable: false
       hippostdpubwf:createdBy: admin
       hippostdpubwf:creationDate: 2026-09-21T19:30:45.151-04:00
-      hippostdpubwf:lastModificationDate: 2026-09-25T09:37:59.255-04:00
+      hippostdpubwf:lastModificationDate: 2026-11-10T13:39:18.850-05:00
       hippostdpubwf:lastModifiedBy: admin
       hippotranslation:id: 6affa1f9-ad0f-4d85-8e35-2e13208df4fd
       hippotranslation:locale: en

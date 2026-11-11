@@ -6,8 +6,8 @@ facet palettes with one field holding a readable boolean expression:
 ```
 Signed In IN [Signed In]
   AND NOT (
-       Size IN [Small]
-    AND Day of the Week IN [Sunday]
+    Size IN [Small]
+      AND Day of the Week IN [Sunday]
   )
 ```
 
@@ -143,9 +143,10 @@ Standard `selection:valuelist` documents of `selection:listitem` children with `
 and `selection:label`. Expressions store **labels** (D2), and facet tokens are the Value List's
 `hippo:name` (D3), so the Value List is the single place display text is edited.
 
-The plugin ships three example value lists (Day of the Week, Signed In, Size) in the folder it
-reads by default, so a fresh install works; point it at your own folder as described in
-[hst/README.md](../hst/README.md).
+The plugin ships three value lists (Day of the Week, Signed In, Size) in the folder it reads by
+default, `/content/documents/administration/faceted-segmentation`, so a fresh install works. They're bootstrapped
+once and then belong to the project. To use your own, point the plugin at your own folder as
+described in [hst/README.md](../hst/README.md).
 
 Two constraints on the data, which the host project owns:
 
@@ -343,8 +344,8 @@ npm test
 ```
 
 Beyond unit coverage of the parser, formatter, evaluator and transforms,
-`catalog-integration.test.ts` runs against the **generated catalog of the value lists the plugin
-ships** (3 facets, 12 values) and asserts:
+`catalog-integration.test.ts` runs against the **generated catalog of the value lists the plugin ships** in
+`repository/` (3 facets, 12 values) and asserts:
 
 - every shipped label parses as a condition value
 - each facet's full-selection expression round-trips through format→parse

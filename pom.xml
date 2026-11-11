@@ -34,6 +34,7 @@
     A brXM Open UI document field that replaces a wall of multi-select facet palettes with a single
     readable boolean expression, plus the delivery-tier parser and evaluator that enforce it.
   </description>
+  <url>https://github.com/bloomreach-forge/faceted-segmentation</url>
   <groupId>org.bloomreach.forge.facetedsegmentation</groupId>
   <artifactId>bloomreach-facetedsegmentation</artifactId>
   <version>1.0.0-SNAPSHOT</version>
@@ -41,6 +42,9 @@
   <inceptionYear>2026</inceptionYear>
 
   <properties>
+    <!-- The Forge site skin needs the older site tooling; with the parent's versions its dates don't render. -->
+    <maven.plugin.site.version>3.12.1</maven.plugin.site.version>
+    <maven.plugin.project-info.version>3.5.0</maven.plugin.project-info.version>
   </properties>
 
   <scm>

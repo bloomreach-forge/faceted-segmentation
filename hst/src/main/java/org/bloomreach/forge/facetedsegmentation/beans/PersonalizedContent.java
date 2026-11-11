@@ -28,12 +28,12 @@ import org.hippoecm.hst.content.beans.standard.HippoHtml;
  * {@code facetseg:FacetedSegmentationSection} children via the generic {@code HippoBean} API, so
  * this class is not required for the component to function. It exists so the plugin's own
  * bundled template (and any project that uses the generic document type as-is, without
- * subclassing) has a typed bean to render against instead of falling back to generic property
- * lookups.
+ * subclassing) has a typed bean to render against, whether or not HST's dynamic bean generation
+ * is on.
  * <p>
  * Standard archetype bean scanning (the default {@code classpath*:org/onehippo/**&#47;*.class}
- * entry in {@code hst-beans-annotated-classes}) picks this class up with no project-side
- * configuration.
+ * entry in {@code hst-beans-annotated-classes}) does NOT cover this package: projects must add
+ * {@code classpath*:org/bloomreach/forge/**&#47;*.class}.
  */
 @Node(jcrType = "facetseg:PersonalizedContent")
 public class PersonalizedContent extends HippoDocument {

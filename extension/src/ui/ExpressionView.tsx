@@ -17,7 +17,7 @@ export function ExpressionView({ expression, staleValues }: Props) {
   if (!expression.trim()) {
     return (
       <div className="fs-expression fs-expression--empty">
-        No segmentation rules — this content is shown to everyone.
+        No rule yet. This section isn't shown to anyone until it has one.
       </div>
     );
   }
