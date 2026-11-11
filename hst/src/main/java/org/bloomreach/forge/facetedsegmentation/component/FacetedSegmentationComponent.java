@@ -23,14 +23,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hippoecm.hst.component.support.bean.BaseHstComponent;
-import org.hippoecm.hst.content.beans.ObjectBeanManagerException;
 import org.hippoecm.hst.content.beans.standard.HippoBean;
 import org.hippoecm.hst.core.component.HstComponentException;
 import org.hippoecm.hst.core.component.HstRequest;
 import org.hippoecm.hst.core.component.HstResponse;
 import org.hippoecm.hst.core.parameters.ParametersInfo;
 import org.hippoecm.hst.core.request.HstRequestContext;
+import org.onehippo.cms7.essentials.components.EssentialsDocumentComponent;
 import org.bloomreach.forge.facetedsegmentation.catalog.CatalogReaderHolder;
 import org.bloomreach.forge.facetedsegmentation.catalog.ValueListCatalogReader;
 import org.bloomreach.forge.facetedsegmentation.expression.AbsentFacetPolicy;
@@ -46,79 +45,51 @@ import org.slf4j.LoggerFactory;
 /**
  * Renders the sections of a document whose segmentation rules match the current request.
  *
- * Request Contributions:
- * document — the configured document bean.
- * matchedSections — every section that matched, in stored order. Empty if none did.
- * matchedSection — the first matched section, or null. Kept for templates that expect one section.
- * renderPublicContent — whether the template should also render the document's public content.
- * audience — the resolved facet values, for debugging a template.
+ * Request attributes:
+ * document — the configured document.
+ * matchedSections — the matching sections, in document order.
+ * renderPublicContent — whether to also render the public content.
+ * audience — the request's facet values.
+ * evaluateOptions — the options the sections were evaluated with.
  *
- * Section Ordering:
- * Sections are always evaluated in stored order, so a CMS user reorders them to change the outcome.
- * How many may win is the {@code sectionMatchMode} parameter:
- *
- * first-match — stop at the earliest match. Order is priority, and at most one section renders.
- * all-matches — evaluate every section and keep all that pass. Order is presentation order only.
- *
- * Whether public content still renders is the separate {@code publicContentMode} parameter:
- *
- * fallback — public content is the ungated alternative, rendered only when nothing matched.
- * always   — public content is a preamble, rendered regardless of what matched.
- *
- * The two are deliberately independent: "how many sections win" and "is public content an
- * alternative or a preamble" are different questions, and projects answer them differently.
- *
- * Facet Values:
- * This implementation reads them from query parameters, keyed by facet id with value keys.
- * e.g. ?day-of-the-week=monday&signedin=in&size=M
- *
- * In the Experience Manager's preview — where the page is rendered inside a CMS-controlled iframe
- * and an author has no way to attach query parameters to it — the real request's query string is
- * ignored and the {@code previewModeQueryParams} component parameter is parsed instead, using that
- * same {@code key=value&key=value} shape. This lets an author preview each section by editing that
- * parameter rather than the (unreachable) URL.
- *
- * The audience is deliberately one per request, not one per component instance.
- * A real deployment usually has an identity or entitlement service instead. To integrate one,
- * subclass and override {@link #resolveAudience(HstRequest, ValueListCatalogReader.Facets)}; nothing
- * else needs to change. Query parameters are a deliberate choice for a plugin default because they
- * need no infrastructure and make the behavior directly testable from a browser.
+ * Facet values come from query parameters by default, so rules can be tried from a browser. To use
+ * another source, such as an identity service, override {@link #resolveAudience}. In preview they
+ * always come from the {@code previewModeQueryParams} parameter.
  */
 @ParametersInfo(type = FacetedSegmentationInfo.class)
-public class FacetedSegmentationComponent extends BaseHstComponent {
+public class FacetedSegmentationComponent extends EssentialsDocumentComponent {
 
     private static final Logger log = LoggerFactory.getLogger(FacetedSegmentationComponent.class);
 
     public static final String ATTRIBUTE_DOCUMENT = "document";
     public static final String ATTRIBUTE_MATCHED_SECTIONS = "matchedSections";
-    public static final String ATTRIBUTE_MATCHED_SECTION = "matchedSection";
     public static final String ATTRIBUTE_RENDER_PUBLIC_CONTENT = "renderPublicContent";
     public static final String ATTRIBUTE_AUDIENCE = "audience";
+    /**
+     * The options the sections were evaluated with, for a subclass that calls {@link #matches} itself.
+     * Absent, like {@link #ATTRIBUTE_AUDIENCE}, when nothing was evaluated. Evaluate nothing then:
+     * against an empty audience, negative rules such as {@code NOT IN} would pass.
+     */
+    public static final String ATTRIBUTE_EVALUATE_OPTIONS = "evaluateOptions";
 
     /** {@code sectionMatchMode}: render every matching section rather than only the first. */
     private static final String MATCH_MODE_ALL = "all-matches";
-
     /** {@code publicContentMode}: render public content regardless of what matched. */
     private static final String PUBLIC_CONTENT_ALWAYS = "always";
-
-    /**
-     * The property holding a section's expression, relative to the section bean. Override
-     * {@link #getExpressionPropertyName()} if a project stores it under a different name.
-     */
+    /** The section property holding its expression. */
     private static final String DEFAULT_EXPRESSION_PROPERTY = "facetseg:faceted_segmentation";
-
-    /**
-     * The child-node name of the sections on the document. Override {@link #getSectionNodeName()} for
-     * a project whose document composes the compound under a different name.
-     */
+    /** The node name of a document's sections. */
     private static final String DEFAULT_SECTION_NODE_NAME = "facetseg:FacetedSegmentationSection";
 
-    @SuppressWarnings("SpellCheckingInspection")
     @Override
     public void doBeforeRender(final HstRequest request, final HstResponse response)
             throws HstComponentException {
         super.doBeforeRender(request, response);
+        evaluateSections(request);
+    }
 
+    /** Split from {@link #doBeforeRender} so it can be tested without a live HST request. */
+    void evaluateSections(final HstRequest request) {
         final FacetedSegmentationInfo info = getComponentParametersInfo(request);
         if (info == null || info.getDocument() == null) {
             log.debug("No document configured on this component instance — nothing to render.");
@@ -126,48 +97,33 @@ public class FacetedSegmentationComponent extends BaseHstComponent {
         }
 
         final HstRequestContext context = request.getRequestContext();
-        // The picker stores an absolute JCR path (e.g. "/content/documents/..."), so it must be
-        // resolved via the object bean manager rather than HippoBean#getBean, which treats its
-        // argument as relative to the bean it is called on.
-        final HippoBean document;
-        try {
-            document = (HippoBean) context.getObjectBeanManager().getObject(info.getDocument());
-        } catch (final ObjectBeanManagerException e) {
-            log.warn("Could not resolve document at '{}' — check the component's configuration.",
-                    info.getDocument(), e);
-            return;
-        }
+        final HippoBean document = (HippoBean) request.getAttribute(ATTRIBUTE_DOCUMENT);
         if (document == null) {
             log.warn("No document found at '{}' — check the component's configuration.", info.getDocument());
             return;
         }
-        request.setAttribute(ATTRIBUTE_DOCUMENT, document);
 
         final ValueListCatalogReader.Facets facets;
         try {
             facets = getCatalogReader().read(context, false);
         } catch (final RuntimeException e) {
-            // Without the catalog we cannot map request values onto expression tokens, so no rule can
-            // be satisfied. Fail closed: no section can win, so the caller falls back to public
-            // content — set the attribute to null explicitly rather than leaving it unset, so a
-            // template's null-check behaves identically whether nothing matched or the catalog failed.
+            // Without the catalog nothing can match, so render public content whatever the mode.
+            // Audience and options stay unset on purpose: see ATTRIBUTE_EVALUATE_OPTIONS.
             log.error("Could not read the facet catalog; falling back to public content.", e);
             request.setAttribute(ATTRIBUTE_MATCHED_SECTIONS, List.of());
-            request.setAttribute(ATTRIBUTE_MATCHED_SECTION, null);
-            // Nothing can match, so public content must render whichever mode is configured —
-            // otherwise a catalog outage would render an empty component.
             request.setAttribute(ATTRIBUTE_RENDER_PUBLIC_CONTENT, true);
             return;
         }
 
-        final Audience audience = resolveAudience(request, facets);
+        // Decided here rather than in resolveAudience, so preview keeps working when that's overridden.
+        final Audience audience = context.isPreview()
+                ? toAudience(parseQueryParams(info.getPreviewModeQueryParams()), facets)
+                : resolveAudience(request, facets);
         final EvaluateOptions options = EvaluateOptions.builder()
                 .absentFacetPolicy(resolvePolicy(info))
                 .build();
 
-        // A document's sections are hipposysedit:ordered, so a CMS user reordering them changes the
-        // outcome under either mode — which one wins under first-match, what order they appear in
-        // under all-matches.
+        // Authors can reorder sections, which changes which one wins under first-match.
         final List<HippoBean> sections = document.getChildBeansByName(getSectionNodeName());
         final boolean stopAtFirst = !MATCH_MODE_ALL.equalsIgnoreCase(trimmed(info.getSectionMatchMode()));
 
@@ -185,11 +141,9 @@ public class FacetedSegmentationComponent extends BaseHstComponent {
                 PUBLIC_CONTENT_ALWAYS.equalsIgnoreCase(trimmed(info.getPublicContentMode()));
 
         request.setAttribute(ATTRIBUTE_MATCHED_SECTIONS, List.copyOf(matched));
-        // The single-section attribute stays populated so a template written against it keeps
-        // working; under all-matches it is the first of several, not the only one.
-        request.setAttribute(ATTRIBUTE_MATCHED_SECTION, matched.isEmpty() ? null : matched.get(0));
         request.setAttribute(ATTRIBUTE_RENDER_PUBLIC_CONTENT, publicAlways || matched.isEmpty());
         request.setAttribute(ATTRIBUTE_AUDIENCE, audience);
+        request.setAttribute(ATTRIBUTE_EVALUATE_OPTIONS, options);
 
         if (log.isDebugEnabled()) {
             log.debug("{} of {} section(s) matched for document '{}' (mode={}, publicContent={}).",
@@ -204,20 +158,25 @@ public class FacetedSegmentationComponent extends BaseHstComponent {
     }
 
     /**
-     * Turns the request into the set of facet values it carries.
-     * <p>Override this to source values from somewhere other than query parameters.
+     * The facet values of a live request. Override this to source them from somewhere other than
+     * query parameters. Not called in preview.
      */
     protected Audience resolveAudience(final HstRequest request,
                                        final ValueListCatalogReader.Facets facets) {
+        // The servlet request, because query parameters belong to the page, not the component.
+        return toAudience(request.getRequestContext().getServletRequest().getParameterMap(), facets);
+    }
+
+    /** Maps facet ids and value keys onto the display names and labels expressions use. */
+    private Audience toAudience(final Map<String, String[]> parameters,
+                                final ValueListCatalogReader.Facets facets) {
         final Audience.Builder builder = Audience.builder();
 
-        final Map<String, String[]> parameters = resolveRequestParameters(request);
         for (final Map.Entry<String, String[]> entry : parameters.entrySet()) {
             final String facetId = entry.getKey();
             final String displayName = facets.displayNameForId(facetId);
             if (displayName == null) {
-                // Not a facet at all — an unrelated query parameter, or a typo. Ignore it rather than
-                // failing: a caller must be free to put anything in a query string.
+                // Not a facet: an unrelated parameter or a typo.
                 log.debug("Ignoring request parameter '{}': no value list with that id.", facetId);
                 continue;
             }
@@ -253,31 +212,7 @@ public class FacetedSegmentationComponent extends BaseHstComponent {
         return builder.build();
     }
 
-    /**
-     * The facet parameters to evaluate sections against.
-     * <p>In the Experience Manager's preview, the page is rendered inside an iframe whose navigation
-     * the CMS controls — there is no way for a content author to attach query parameters to it — so
-     * a live request there never carries real facet values. In that case this returns the
-     * component's {@code previewModeQueryParams} parameter instead, letting an author preview each
-     * section by editing that parameter. Everywhere else it returns the actual request's query
-     * parameters, as {@link #resolveAudience} always did.
-     */
-    private Map<String, String[]> resolveRequestParameters(final HstRequest request) {
-        final HstRequestContext context = request.getRequestContext();
-        if (!context.isPreview()) {
-            // Use HttpServletRequest instead of HstRequest as query parameters are one per request, not one per component.
-            return context.getServletRequest().getParameterMap();
-        }
-
-        final FacetedSegmentationInfo info = getComponentParametersInfo(request);
-        final String rawQueryParams = info == null ? null : info.getPreviewModeQueryParams();
-        return parseQueryParams(rawQueryParams);
-    }
-
-    /**
-     * Parses a {@code key=value&key=value} string — the same shape as a URL query string — into a
-     * parameter map, without needing a real request to attach it to.
-     */
+    /** Parses a {@code key=value&key=value} string into a parameter map. */
     private Map<String, String[]> parseQueryParams(final String rawQueryParams) {
         final Map<String, List<String>> collected = new LinkedHashMap<>();
         if (rawQueryParams == null || rawQueryParams.isBlank()) {
@@ -310,13 +245,8 @@ public class FacetedSegmentationComponent extends BaseHstComponent {
     }
 
     /**
-     * Evaluates one section's rule.
-     * A section with no expression is never a match — authoring requires a facet definition (see
-     * the {@code non-empty} validator on {@code facetseg:faceted_segmentation}), so a blank
-     * expression here means a pre-existing document that predates that requirement, or a section
-     * mid-edit. Either way it must not win over public content or another section by defaulting to
-     * "always matches" the way an empty (truly ungated) expression does elsewhere in this library.
-     * A section whose expression is malformed is likewise hidden.
+     * Evaluates one section's rule. A blank or malformed expression never matches. Elsewhere in the
+     * library an empty expression means "always", but here that would let a half-edited section win.
      */
     protected boolean matches(final HippoBean section, final Audience audience,
                               final EvaluateOptions options) {
@@ -345,17 +275,13 @@ public class FacetedSegmentationComponent extends BaseHstComponent {
         try {
             return AbsentFacetPolicy.valueOf(configured.trim().toUpperCase());
         } catch (final IllegalArgumentException e) {
-            // An editor cannot fix a mistyped component parameter from the delivery tier, so fall back
-            // to the safe option rather than failing the page.
+            // Fall back to the safe policy rather than failing the page.
             log.warn("Unrecognised absentFacetPolicy '{}'; falling back to STRICT.", configured);
             return AbsentFacetPolicy.STRICT;
         }
     }
 
-    /**
-     * The shared catalog reader. Looked up from the HST component manager so the endpoint and the
-     * delivery tier share one cache; override in a subclass to supply one directly.
-     */
+    /** The catalog reader shared with the catalog endpoint, so both use one cache. */
     protected ValueListCatalogReader getCatalogReader() {
         final ValueListCatalogReader configured = CatalogReaderHolder.get();
         if (configured != null) {

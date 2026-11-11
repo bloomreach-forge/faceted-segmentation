@@ -31,16 +31,20 @@
 
   <name>Bloomreach Forge Faceted Segmentation Plugin</name>
   <description>
-    A brXM Open UI document field that replaces a wall of multi-select facet palettes with a single
-    readable boolean expression, plus the delivery-tier parser and evaluator that enforce it.
+    Personalizes sections of a document to audience facets: editors write one readable boolean rule
+    per section, and the site shows only the sections that match.
   </description>
+  <url>https://github.com/bloomreach-forge/faceted-segmentation</url>
   <groupId>org.bloomreach.forge.facetedsegmentation</groupId>
   <artifactId>bloomreach-facetedsegmentation</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>pom</packaging>
   <inceptionYear>2026</inceptionYear>
 
   <properties>
+    <!-- The Forge site skin needs the older site tooling; with the parent's versions its dates don't render. -->
+    <maven.plugin.site.version>3.12.1</maven.plugin.site.version>
+    <maven.plugin.project-info.version>3.5.0</maven.plugin.project-info.version>
   </properties>
 
   <scm>
@@ -172,6 +176,13 @@
         <version>${hippo.release.version}</version>
         <scope>provided</scope>
       </dependency>
+      <!-- CommonComponent / EssentialsDocumentComponent, the Essentials base classes for an HST component. -->
+      <dependency>
+        <groupId>org.onehippo.cms7</groupId>
+        <artifactId>hippo-essentials-components-hst</artifactId>
+        <version>${hippo.release.version}</version>
+        <scope>provided</scope>
+      </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
@@ -196,6 +207,13 @@
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-params</artifactId>
         <version>${junit-jupiter.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <!-- MockHstRequest / MockHippoBean, for testing the component without a running HST. -->
+      <dependency>
+        <groupId>org.onehippo.cms7.hst</groupId>
+        <artifactId>hst-mock</artifactId>
+        <version>${hippo.release.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>

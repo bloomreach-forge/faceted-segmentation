@@ -33,7 +33,7 @@
 
   <!-- How long a read is served before the repository is re-read. -->
   <bean id="facetedSegmentationCacheTtlSeconds" class="java.lang.Long">
-    <constructor-arg type="java.lang.String" value="900"/>
+    <constructor-arg type="java.lang.String" value="300"/>
   </bean>
 
   <!--
@@ -68,7 +68,7 @@
     child Spring context, so the plain-JAX-RS pipeline's `customRestPlainResourceProviders` list
     (which lives in the ROOT context) cannot see beans defined here. Registering the resource is
     therefore a one-time step the consuming project performs, in its own
-    META-INF/hst-assembly/overrides/*.xml, referencing this bean out of this module:
+    META-INF/hst-assembly/overrides/*.xml, with its own instance of the resource:
 
       <bean id="customRestPlainResourceProviders"
             class="org.springframework.beans.factory.config.ListFactoryBean">
@@ -76,14 +76,17 @@
           <list>
             <bean class="org.apache.cxf.jaxrs.lifecycle.SingletonResourceProvider">
               <constructor-arg>
-                <bean class="org.bloomreach.forge.facetedsegmentation.catalog.FacetCatalogResource">
-                  <property name="valueListsPath" value="/content/documents/.../value-lists"/>
-                </bean>
+                <bean class="org.bloomreach.forge.facetedsegmentation.catalog.FacetCatalogResource"/>
               </constructor-arg>
             </bean>
           </list>
         </property>
       </bean>
+
+    Leave that instance unconfigured: it then reads through the reader above (via
+    CatalogReaderHolder), so a resync from the field also refreshes what the delivery-tier component
+    sees. Setting valueListsPath or ttlSeconds on it gives it a private reader instead — configure
+    the path through facetedSegmentationValueListsPath.
 
     The project also needs a mount with `hst:namedpipeline: JaxrsRestPlainPipeline` to route requests
     to it. Both steps are in this module's own README.md (bloomreach-facetedsegmentation-hst/README.md),

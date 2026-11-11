@@ -121,12 +121,11 @@ public class ValueListCatalogReader {
         final List<ValueList> valueLists = folder.getDocuments(ValueList.class);
 
         if (valueLists.isEmpty()) {
-            // An unpublished value list is simply not readable through the live session, so a missing
-            // list looks like absence rather than an error. Say so, since "zero facets" is otherwise
-            // indistinguishable from a wrong path.
-            log.warn("No selection:valuelist documents found under '{}'. If value lists exist there, "
-                    + "check they are PUBLISHED — the live session filters on hippo:availability.",
-                    valueListsPath);
+            // "Zero facets" is otherwise indistinguishable from a misconfiguration, so name the likely
+            // causes. Value lists have no unpublished state, so publication is never the reason.
+            log.warn("No selection:valuelist documents found directly under '{}'. Check the configured "
+                    + "path, and that the value lists sit in that folder itself — subfolders are not "
+                    + "read.", valueListsPath);
         }
 
         final List<FacetCatalog.Facet> facets = new ArrayList<>(valueLists.size());

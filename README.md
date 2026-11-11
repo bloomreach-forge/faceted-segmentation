@@ -8,8 +8,8 @@ An editor writes this, in one field:
 ```
 Signed In IN [Signed In]
   AND (
-       Size IN [Large]
-    OR Day of the Week IN [Saturday, Sunday]
+    Size IN [Large]
+      OR Day of the Week IN [Saturday, Sunday]
   )
 ```
 
@@ -35,7 +35,7 @@ sentence.
 |---|---|---|
 | [`common/`](common) | `bloomreach-facetedsegmentation-common` | The grammar: parser, formatter, evaluator. No brXM dependency. |
 | [`hst/`](hst) | `bloomreach-facetedsegmentation-hst` | Delivery tier — component, content beans, the facet catalog REST resource. See [hst/README.md](hst/README.md). |
-| [`repository/`](repository) | `bloomreach-facetedsegmentation-repository` | CMS side — document types, the Open UI registration, example value lists. |
+| [`repository/`](repository) | `bloomreach-facetedsegmentation-repository` | CMS side — document types, the Open UI registration, three starter value lists. |
 | [`extension/`](extension) | *(npm, not Maven)* | The Open UI field itself — React + TypeScript + Vite. See [extension/README.md](extension/README.md). |
 | [`demo/`](demo) | — | A brXM project consuming the published artifacts, as a customer project would. Not a Maven module of the root pom, so it is never released. |
 
@@ -98,8 +98,11 @@ Add the filter in your site webapp's `WEB-INF/web.xml`:
 </context-param>
 ```
 
-Omitting this is a quiet failure: the component still renders, but section fields resolve through
-generic property lookups instead of typed beans.
+Recommended. Without it, rendering depends on HST's dynamic content beans: with dynamic bean
+generation on (the default), HST generates equivalent beans at runtime and the page renders the
+same; with it off (`-Ddynamic.bean.generation=false`), rules still evaluate but the template can't
+read `public` or a section's `content`, so they render blank. With the scan, HST uses the plugin's
+beans either way.
 
 ### 3. Register the catalog REST endpoint
 
@@ -116,9 +119,10 @@ the registration node, and add the CSP allowances. Full detail, including the tr
 ### 5. Choose where facets come from
 
 By default the plugin reads every `selection:valuelist` directly inside
-`/content/documents/administration/faceted-segmentation` — the folder it bootstraps itself, holding
-three example facets (Day of the Week, Signed In, Size) so a fresh install has something to
-demonstrate. The scan is not recursive. Point it at your own folder by overriding one Spring bean;
+`/content/documents/administration/faceted-segmentation`, which `repository/` bootstraps with three value lists
+(Day of the Week, Signed In, Size) so a fresh install has facets to work with. HCM loads them once;
+after that they're the project's content, and plugin upgrades never overwrite them. The scan is not
+recursive. Point it at your own folder by overriding one Spring bean;
 see [hst/README.md](hst/README.md#1-pointing-the-plugin-at-your-own-value-lists-optional).
 
 ### 6. Add the field to a document type
@@ -167,12 +171,26 @@ contains no mode logic of its own:
 |---|---|---|
 | `document` | `HippoBean` | The configured document. |
 | `matchedSections` | `List<HippoBean>` | Every section that matched, in order. Empty if none. |
-| `matchedSection` | `HippoBean` | The first match, or null. Retained for templates written against a single section. |
 | `renderPublicContent` | `Boolean` | Whether the template should also render public content. |
 | `audience` | `Audience` | The resolved facet values, for debugging. |
+| `evaluateOptions` | `EvaluateOptions` | The options the sections were evaluated with. For a subclass that calls `matches()` on beans of its own. |
+
+`audience` and `evaluateOptions` are set only when evaluation actually ran. If there's no document,
+or the catalog couldn't be read, both are absent, and a subclass should evaluate nothing.
+Substituting an empty audience is **not** safe: `NOT IN` passes for it under `permissive`, and a
+negated `IN` passes for it under either policy, so content would fail open.
 
 Because the component resolves `renderPublicContent` itself, a custom template never needs to read
 either parameter: loop `matchedSections`, and honour `renderPublicContent`.
+
+A template that only ever renders one section takes the first item explicitly:
+
+```ftl
+<#if matchedSections?has_content>
+  <#assign section = matchedSections?first>
+  ...
+</#if>
+```
 
 ## Building
 
@@ -192,7 +210,7 @@ For the Open UI extension:
 cd extension
 npm install
 npm run build                    # -> dist/, two entry points
-npm test                         # 113 tests
+npm test
 npm run dev                      # dev server on :5173
 ```
 
@@ -269,10 +287,10 @@ characters — and treat the exact figure as documentation-sourced rather than v
 The builder emits a deterministic indented format, so that diffs and version comparison are
 meaningful:
 
-- Two spaces of indent per nesting level.
-- A binary operator joining two operands starts the line of its right-hand operand.
-- A group's `(` ends the line that introduces it; its `)` sits on its own line, at the indent of
-  the construct that opened it.
+- The first operand of `AND`/`OR` starts the line; each further operand goes on its own line,
+  indented two spaces and starting with the operator.
+- A group's `(` ends the line that introduces it. Its contents are indented two more spaces, and
+  its `)` sits on its own line, at the indent of the line that opened it.
 - Values are separated by `, ` and wrapped at a soft ~64-column margin, aligned inside `[`.
 
 ```
@@ -283,8 +301,8 @@ Size IN [Medium, Large]
 ```
 Signed In IN [Signed In]
   AND (
-       Size IN [Large]
-    OR Day of the Week IN [Saturday, Sunday]
+    Size IN [Large]
+      OR Day of the Week IN [Saturday, Sunday]
   )
 ```
 
@@ -397,18 +415,11 @@ is legitimate and is left alone.
 
 ## Status
 
-Functionally complete and passing: 89 Java tests, 113 TypeScript tests, type-check, and production
-build. The demo renders end-to-end — drag the catalog item onto a page, and a `PersonalizedContent`
+Functionally complete. The demo renders end-to-end — drag the catalog item onto a page, and a `PersonalizedContent`
 document's sections are gated by their expressions.
 
 Before a first release:
 
-- **Maven site** (`src/site/`) for publication to GitHub Pages, per the
-  [Forge quality checklist](https://bloomreach-forge.github.io/checklist.html). Documentation is
-  currently these READMEs, which the checklist does not accept as a substitute.
-- **Run it in a browser.** The build and test suites pass, but the two new
-  `sectionMatchMode` / `publicContentMode` parameters have not been exercised in a live CMS — only
-  in unit tests and a template-rendering harness.
 - **Version is `1.0.0-SNAPSHOT`.** Publishing to the Forge repository needs a release build, and
   only Bloomreach developers have write access there.
 
@@ -417,7 +428,7 @@ Known gaps, deliberate:
 - The grammar has **no tuple support** — a condition compares one facet against a flat list of
   values. A paired facet (e.g. strategy + product, where the pair must match together) cannot be
   expressed.
-- The shipped example value lists are small and tidy, so they do not exercise labels containing
+- The shipped value lists are small and tidy, so they do not exercise labels containing
   parentheses, `&`, `®` or `/`, nor a list of 50+ values. Tokenizing is covered directly by
   `expression.test.ts`; a project whose own value lists contain such labels should validate them
   with `npm run catalog:generate`, which warns on anything unsafe.

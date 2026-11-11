@@ -57,7 +57,8 @@ import org.slf4j.LoggerFactory;
  * what the field's "Resync facet values" button calls).
  *
  * <p>The value lists themselves are read by {@link ValueListCatalogReader}, shared with the delivery
- * tier so both halves see the same data through the same cache.
+ * tier so both halves see the same data through the same cache — which is also why a resync
+ * refreshes the page render, not just the authoring field. See {@link #reader()}.
  */
 @Path("/facets")
 public class FacetCatalogResource extends AbstractResource {
@@ -65,29 +66,54 @@ public class FacetCatalogResource extends AbstractResource {
     private static final Logger log = LoggerFactory.getLogger(FacetCatalogResource.class);
 
     private static final String DEFAULT_VALUE_LISTS_PATH = "/content/documents/administration/faceted-segmentation";
-    private static final long DEFAULT_TTL_SECONDS = 900L;
+    private static final long DEFAULT_TTL_SECONDS = 300L;
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final AtomicReference<CachedCatalog> cache = new AtomicReference<>();
 
-    private ValueListCatalogReader reader =
-            new ValueListCatalogReader(DEFAULT_VALUE_LISTS_PATH, DEFAULT_TTL_SECONDS);
+    /** Null unless injected or configured directly; see {@link #reader()}. */
+    private ValueListCatalogReader reader;
 
     /**
      * Injected so the endpoint and the delivery-tier component share one reader, and therefore one
-     * cache and one configured path. When unset, a default reader is used.
+     * cache and one configured path. When unset, the addon's shared reader is used.
      */
     public void setReader(final ValueListCatalogReader reader) {
         this.reader = reader;
     }
 
-    /** Convenience for a deployment that configures the resource directly rather than the reader. */
+    /**
+     * Convenience for a deployment that configures the resource directly rather than the reader.
+     * This gives the resource a private reader, so a resync no longer refreshes the delivery tier.
+     */
     public void setValueListsPath(final String valueListsPath) {
-        reader.setValueListsPath(valueListsPath);
+        privateReader().setValueListsPath(valueListsPath);
     }
 
     public void setTtlSeconds(final long ttlSeconds) {
-        reader.setTtlSeconds(ttlSeconds);
+        privateReader().setTtlSeconds(ttlSeconds);
+    }
+
+    /**
+     * The reader to use, preferring the one the delivery-tier component reads through, so that a
+     * resync ({@code ?refresh=true}) refreshes the page render too, not just the authoring field.
+     *
+     * <p>Looked up per request rather than at construction: a project registers this resource in the
+     * root Spring context, which is built before the addon module publishes the shared reader.
+     */
+    private ValueListCatalogReader reader() {
+        if (reader != null) {
+            return reader;
+        }
+        final ValueListCatalogReader shared = CatalogReaderHolder.get();
+        return shared != null ? shared : privateReader();
+    }
+
+    private ValueListCatalogReader privateReader() {
+        if (reader == null) {
+            reader = new ValueListCatalogReader(DEFAULT_VALUE_LISTS_PATH, DEFAULT_TTL_SECONDS);
+        }
+        return reader;
     }
 
     @GET
@@ -125,7 +151,7 @@ public class FacetCatalogResource extends AbstractResource {
             // Deliberately broad: whatever goes wrong reading the repository, the field needs a
             // response it can report rather than a dropped connection, which it cannot distinguish
             // from a CSP or CORS failure.
-            log.error("Could not build the facet catalog from '{}'.", reader.getValueListsPath(), e);
+            log.error("Could not build the facet catalog from '{}'.", reader().getValueListsPath(), e);
             return serverError("Could not read the facet catalog: " + e.getMessage());
         }
     }
@@ -138,13 +164,13 @@ public class FacetCatalogResource extends AbstractResource {
             return null;
         }
         final long ageSeconds = (System.currentTimeMillis() - cached.fetchedAtMillis) / 1000L;
-        return ageSeconds < reader.getTtlSeconds() ? cached : null;
+        return ageSeconds < reader().getTtlSeconds() ? cached : null;
     }
 
     private CachedCatalog readAndCache(final HstRequestContext context, final boolean refresh)
             throws Exception {
 
-        final List<FacetCatalog.Facet> facets = reader.read(context, refresh).all();
+        final List<FacetCatalog.Facet> facets = reader().read(context, refresh).all();
 
         final FacetCatalog catalog = new FacetCatalog();
         catalog.setFacets(facets);
@@ -176,7 +202,7 @@ public class FacetCatalogResource extends AbstractResource {
     }
 
     private String cacheControl() {
-        return "max-age=" + reader.getTtlSeconds();
+        return "max-age=" + reader().getTtlSeconds();
     }
 
     private static Response serverError(final String message) {

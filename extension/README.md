@@ -6,8 +6,8 @@ facet palettes with one field holding a readable boolean expression:
 ```
 Signed In IN [Signed In]
   AND NOT (
-       Size IN [Small]
-    AND Day of the Week IN [Sunday]
+    Size IN [Small]
+      AND Day of the Week IN [Sunday]
   )
 ```
 
@@ -143,9 +143,10 @@ Standard `selection:valuelist` documents of `selection:listitem` children with `
 and `selection:label`. Expressions store **labels** (D2), and facet tokens are the Value List's
 `hippo:name` (D3), so the Value List is the single place display text is edited.
 
-The plugin ships three example value lists (Day of the Week, Signed In, Size) in the folder it
-reads by default, so a fresh install works; point it at your own folder as described in
-[hst/README.md](../hst/README.md).
+The plugin ships three value lists (Day of the Week, Signed In, Size) in the folder it reads by
+default, `/content/documents/administration/faceted-segmentation`, so a fresh install works. They're bootstrapped
+once and then belong to the project. To use your own, point the plugin at your own folder as
+described in [hst/README.md](../hst/README.md).
 
 Two constraints on the data, which the host project owns:
 
@@ -342,9 +343,9 @@ operator keyword. Full spec, including why that is safe for a label like
 npm test
 ```
 
-113 tests. Beyond unit coverage of the parser, formatter, evaluator and transforms,
-`catalog-integration.test.ts` runs against the **generated catalog of the value lists the plugin
-ships** (3 facets, 12 values) and asserts:
+Beyond unit coverage of the parser, formatter, evaluator and transforms,
+`catalog-integration.test.ts` runs against the **generated catalog of the value lists the plugin ships** in
+`repository/` (3 facets, 12 values) and asserts:
 
 - every shipped label parses as a condition value
 - each facet's full-selection expression round-trips through format→parse
@@ -370,7 +371,7 @@ parentheses, `&`, `®` or `/`, nor a list of 50+ values. Tokenizing is covered d
 ```json
 {
   "catalogUrl": "${facetCatalog.url}",
-  "cacheTtlSeconds": 900,
+  "cacheTtlSeconds": 300,
   "dialogSize": "large",
   "absentFacetPolicy": "permissive",
   "facets": ["channel", "distribution", "license-state"]
@@ -429,14 +430,16 @@ keep that sustainable:
    one in-flight fetch and one result, so N sections don't each trigger their own request.
 2. **`localStorage`**, under the fixed key `brxm.facetedSegmentation.catalog.v1` — survives dialog
    open/close and page reloads, so reopening the dialog is instant. Served without a network call
-   whenever it is younger than `cacheTtlSeconds` (default 900s), and served **regardless of age**
+   whenever it is younger than `cacheTtlSeconds` (default 300s), and served **regardless of age**
    as a fallback if a live fetch then fails — see [Degraded vs.
    failed](#diagnosing-catalog-failures).
 3. **In-memory TTL cache** in the catalog service (Java, not the browser) — one repository read
    serves every editor session, not just one document's fields.
 
 **Resync facet values** in the dialog clears layers 1 and 2 and forces a fresh fetch (`?refresh=true`),
-which also bypasses layer 3 on the server.
+which also bypasses layer 3 on the server. The page render reads through that same server cache, so
+it sees the new values immediately too — on the node that served the resync. Other cluster nodes
+pick them up when their own cache expires (5 minutes by default).
 
 **The `localStorage` key is a fixed string, not scoped by `catalogUrl` or deployment.** Two
 consequences:

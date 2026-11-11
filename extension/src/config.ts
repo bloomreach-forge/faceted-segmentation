@@ -39,7 +39,7 @@ export interface ExtensionConfig {
 
 const DEFAULTS: ExtensionConfig = {
   catalogUrl: '/api/facets',
-  cacheTtlSeconds: 900,
+  cacheTtlSeconds: 300,
   dialogSize: 'large',
   absentFacetPolicy: 'strict',
 };

@@ -246,7 +246,7 @@ export function DialogApp() {
           ) : (
             <div className="fs-empty">
               <p>
-                No rules yet. This content is shown to <strong>everyone</strong>.
+                No rules yet. Add a condition to choose who sees this section.
               </p>
               <div className="fs-field-actions" style={{ justifyContent: 'center' }}>
                 <button
@@ -266,7 +266,7 @@ export function DialogApp() {
           <div>
             <p className="fs-section-title">Result</p>
             <pre className="fs-preview">
-              {preview || 'No segmentation — shown to everyone.'}
+              {preview || 'No rule yet — shown to no one.'}
             </pre>
             {cleaned && (
               <div className="fs-meta" style={{ marginTop: 6 }}>

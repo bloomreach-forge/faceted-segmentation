@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2026 Bloomreach
+
+  Licensed under the Apache License, Version 2.0 (the  "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS"
+  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<project name="Bloomreach Forge Faceted Segmentation">
+
+  <skin>
+    <groupId>org.bloomreach.forge.mavenskin</groupId>
+    <artifactId>forge-maven-skin</artifactId>
+    <version>3.2.1</version>
+  </skin>
+
+  <custom>
+    <bloomreach>
+      <gitHub>
+        <projectId>bloomreach-forge/faceted-segmentation</projectId>
+      </gitHub>
+    </bloomreach>
+  </custom>
+
+  <publishDate format="d MMMM yyyy" />
+
+  <body>
+
+    <head>
+      <![CDATA[<script type="text/javascript" src="./js/site.js"></script>]]>
+    </head>
+
+    <menu name="Home">
+      <item name="Introduction" href="index.html" />
+      <item name="Release Notes" href="release-notes.html" />
+    </menu>
+
+    <menu name="Getting Started">
+      <item name="Installation" href="install.html" />
+      <item name="Demo Project" href="demo.html" />
+    </menu>
+
+    <menu name="For Editors">
+      <item name="Building a Rule" href="building-a-rule.html" />
+      <item name="Previewing Segments" href="previewing.html" />
+    </menu>
+
+    <menu name="For Developers">
+      <item name="Rendering Sections" href="rendering.html" />
+      <item name="Sourcing Audience Data" href="audience-sources.html" />
+      <item name="Using Your Own Document Type" href="own-document-type.html" />
+      <item name="Expression Grammar" href="grammar.html" />
+      <item name="Customising" href="customising.html" />
+    </menu>
+
+    <menu ref="reports" />
+
+  </body>
+
+</project>

@@ -25,14 +25,14 @@ export interface LoadResult {
 
 export interface LoadOptions {
   catalogUrl: string;
-  /** How long a cached copy is served before revalidating. Default 15 minutes. */
+  /** How long a cached copy is served before revalidating. Default 5 minutes. */
   maxAgeSeconds?: number;
   /** Bypass every cache layer and re-read from the repository. The resync button. */
   refresh?: boolean;
 }
 
 export async function loadCatalog(options: LoadOptions): Promise<LoadResult> {
-  const { catalogUrl, maxAgeSeconds = 900, refresh = false } = options;
+  const { catalogUrl, maxAgeSeconds = 300, refresh = false } = options;
 
   if (refresh) {
     inflight = null;

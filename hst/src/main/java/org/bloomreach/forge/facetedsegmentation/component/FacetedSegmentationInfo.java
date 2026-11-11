@@ -18,18 +18,19 @@ package org.bloomreach.forge.facetedsegmentation.component;
 import org.hippoecm.hst.core.parameters.DropDownList;
 import org.hippoecm.hst.core.parameters.JcrPath;
 import org.hippoecm.hst.core.parameters.Parameter;
+import org.onehippo.cms7.essentials.components.info.EssentialsDocumentComponentInfo;
 
-/**
- * Channel-Manager parameters for {@link FacetedSegmentationComponent}.
- */
-public interface FacetedSegmentationInfo {
+public interface FacetedSegmentationInfo extends EssentialsDocumentComponentInfo {
 
     /**
-     * The document whose faceted segmentation sections this component renders. Left unrestricted
-     * here; a project should override to pin {@code pickerSelectableNodeTypes} to its own type.
+     * The document whose faceted segmentation sections this component renders.
+     * A project should override to pin {@code pickerSelectableNodeTypes} to its own type.
      */
+    @Override
     @Parameter(name = "document", required = true, displayName = "Document")
-    @JcrPath(pickerConfiguration = "cms-pickers/documents-only")
+    @JcrPath(isRelative = true,
+            pickerSelectableNodeTypes = "facetseg:PersonalizedContent",
+            pickerConfiguration = "cms-pickers/documents-only")
     String getDocument();
 
     /**
@@ -67,7 +68,8 @@ public interface FacetedSegmentationInfo {
     String getPublicContentMode();
 
     /**
-     * Used exclusively in the Experience Manager to preview the component with different facet values.
+     * The facet values to use in preview, where authors can't add query parameters. Replaces the
+     * normal audience source there, including an overridden {@code resolveAudience}.
      */
     @Parameter(name = "previewModeQueryParams", defaultValue = "day-of-the-week=monday&signedin=in", displayName = "Preview mode query parameters")
     String getPreviewModeQueryParams();

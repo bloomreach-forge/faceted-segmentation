@@ -12,8 +12,8 @@ to wire up itself. For dependency coordinates and the wider install sequence, se
 - `PersonalizedContent` / `FacetedSegmentationSection` (`org.bloomreach.forge.facetedsegmentation.beans`)
   — typed HST content beans for `facetseg:PersonalizedContent` / `facetseg:FacetedSegmentationSection`.
   Not required by `FacetedSegmentationComponent` itself (it reads sections via the generic
-  `HippoBean` API), but used by this jar's own bundled template (next bullet) instead of falling
-  back to generic property lookups. **These need one line of project configuration** — see
+  `HippoBean` API), but used by this jar's own bundled template (next bullet), unless HST's dynamic
+  bean generation stands in for them. **These need one line of project configuration** — see
   [step 0](#0-let-hst-find-the-content-beans) below.
 - The `hst:catalog` entry and `hst:templates` registration for the generic (non-subclassed)
   component, via `hcm-config/hst/configurations/default/{catalog,templates}.yaml`. These bootstrap
@@ -85,9 +85,11 @@ The standard archetype's default `hst-beans-annotated-classes` scan covers
 </context-param>
 ```
 
-This is a quiet failure if omitted: the component still renders, because it falls back to the
-generic `HippoBean` API, but the bundled template's typed accessors resolve through generic property
-lookups instead. See
+Recommended. The component itself doesn't need the beans: it reads sections and rules through the
+generic `HippoBean` API. The bundled template does: it calls `document.public` and
+`section.content`. Without the scan, those resolve only if HST's dynamic bean generation is on (the
+default), which generates equivalent beans at runtime. With `-Ddynamic.bean.generation=false` they
+don't, and the content renders blank. With the scan, HST uses the plugin's beans either way. See
 [`../demo/site/webapp/src/main/webapp/WEB-INF/web.xml`](../demo/site/webapp/src/main/webapp/WEB-INF/web.xml).
 
 ### 1. Pointing the plugin at your own value lists (optional)
@@ -114,7 +116,7 @@ in your site components module, redefining the path bean:
 </beans>
 ```
 
-`facetedSegmentationCacheTtlSeconds` (default 900) can be overridden the same way.
+`facetedSegmentationCacheTtlSeconds` (default 300) can be overridden the same way.
 
 ### 2. Narrowing the document picker (optional)
 
@@ -171,6 +173,12 @@ the comment on `FacetCatalogResource`'s bean definition in
 
 The `<import>`s are required: the JAX-RS pipelines are optional and their Spring definitions live
 outside the auto-scanned `META-INF/hst-assembly` tree, so nothing loads them unless you do it here.
+
+Leave the `FacetCatalogResource` bean unconfigured, as above. It then reads through the same
+`ValueListCatalogReader` as the delivery-tier component, so **Resync facet values** in the field
+refreshes the page render as well. Setting `valueListsPath` or `ttlSeconds` on the resource itself
+gives it a private reader, and the page render then waits out its TTL after a resync. Configure the
+path with the `facetedSegmentationValueListsPath` bean (step 1) instead.
 
 **The mount** — add to your own `hcm-config/hst/hosts.yaml`, under every virtual host group/domain
 that needs it (local dev, staging, production — not just one):
