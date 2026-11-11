@@ -37,7 +37,7 @@
   <url>https://github.com/bloomreach-forge/faceted-segmentation</url>
   <groupId>org.bloomreach.forge.facetedsegmentation</groupId>
   <artifactId>bloomreach-facetedsegmentation</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <inceptionYear>2026</inceptionYear>
 

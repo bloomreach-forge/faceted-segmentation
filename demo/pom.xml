@@ -68,7 +68,7 @@
       reactor module, resolved from the local repo (or the forge releases repository below) at
       this version. See ../pom.xml for the plugin's own build.
     -->
-    <facetedsegmentation.version>1.0.0</facetedsegmentation.version>
+    <facetedsegmentation.version>1.0.1-SNAPSHOT</facetedsegmentation.version>
 
     <essentials.version>17.2.0</essentials.version>
 
