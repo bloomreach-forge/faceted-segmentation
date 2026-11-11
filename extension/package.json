@@ -1,6 +1,6 @@
 {
   "name": "@bloomreach-ps/faceted-segmentation-extension",
-  "version": "1.0.0-SNAPSHOT",
+  "version": "1.0.0",
   "description": "Bloomreach brXM Open UI field for building faceted segmentation boolean expressions",
   "scripts": {
     "dev": "vite",
