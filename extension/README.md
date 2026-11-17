@@ -16,7 +16,7 @@ The grammar, the design decisions (referenced below as D1…D14) and the module 
 
 ## Stack
 
-React 19 · TypeScript 5.9 · Vite 6 · `@bloomreach/ui-extension` 17.2.0 (matching brXM 17.2.0).
+React 19 · TypeScript 5.9 · Vite 6 · `@bloomreach/ui-extension` 17.4.1 (matching brXM 17.4.1).
 
 The `src/expression/` layer is deliberately **framework-free** — no React import — so the
 grammar can be reused by tooling, ported, or tested in isolation.
@@ -55,7 +55,7 @@ What a host project must provide before this extension works. Nothing here is op
 |---|---|---|
 | **Node** | `^20.19.0 \|\| ^22.12.0 \|\| >=24.0.0` | Declared in `engines`. Developed and verified on **24.19.0** (pinned in `.nvmrc`). |
 | **npm** | `>=10.0.0` | Verified on **11.17.0**. Needs to understand `lockfileVersion: 3`. |
-| brXM | 17.x | Built against `@bloomreach/ui-extension` 17.2.0; the SDK major should match the platform. |
+| brXM | 17.x | Built against `@bloomreach/ui-extension` 17.4.1; the SDK major should match the platform. |
 | JDK | 21 | For the host brXM project only — **not** needed to build this extension. |
 
 ```bash
@@ -79,7 +79,7 @@ non-LTS and unsupported, so `node 23` will fail even though it is "newer than 20
 
 **One deliberate omission: `engine-strict` is not enabled.** Setting it in `.npmrc` would make
 the range above a hard error rather than a warning, which sounds desirable — but npm applies
-`engine-strict` to **dependencies too**, and `@bloomreach/ui-extension@17.2.0` declares
+`engine-strict` to **dependencies too**, and `@bloomreach/ui-extension@17.4.1` declares
 `{"node":"14","npm":"7"}`, so install fails outright:
 
 ```

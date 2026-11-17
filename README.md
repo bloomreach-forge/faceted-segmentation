@@ -222,7 +222,7 @@ npm run dev                      # dev server on :5173
 | Maven | 3.9.x | 3.9.15 |
 | Node | `^20.19.0 \|\| ^22.12.0 \|\| >=24.0.0` (extension only) | 24.19.0 |
 | npm | >=10 (extension only) | 11.17.0 |
-| brXM | 17.x | 17.2.0 |
+| brXM | 17.x | 17.4.1 |
 
 Node's range excludes odd-numbered releases; `extension/.nvmrc` pins it, and the reasoning plus the
 one deliberate `engine-strict` omission is in
