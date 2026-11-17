@@ -43,7 +43,7 @@ Faceted Segmentation puts a rule on each section of a document and allows condit
 | `bloomreach-facetedsegmentation-common` | Reads and evaluates rules. Has no brXM dependency. |
 | `bloomreach-facetedsegmentation-hst` | The site side: the component that picks sections, the content beans, and the REST endpoint the field gets its facets from. |
 | `bloomreach-facetedsegmentation-repository` | The CMS side: the document type, the field registration, and example value lists. |
-| Open UI extension | The field and rule builder editors use. Must be hosted separately. |
+| `bloomreach-facetedsegmentation-frontend` | The field and rule builder editors use, an Open UI extension that the CMS serves itself. |
 
 Facets are ordinary value lists, so editors manage them where they already manage value lists.
 The plugin has no dependency on the Relevance module. 

@@ -1,6 +1,6 @@
 # Installation
 
-Installing the plugin takes eight steps. Some are one-off Maven and web.xml edits. The rest are
+Installing the plugin takes six steps. Some are one-off Maven and web.xml edits. The rest are
 configuration that changes per environment.
 
 To see every step working in a real project, look at the [Demo Project](demo.html). 
@@ -22,11 +22,11 @@ doesn't list it yet, add it:
 
 ## 2. Add the dependencies
 
-Add a version property and manage both artifacts in the root `pom.xml`:
+Add a version property and manage the three artifacts in the root `pom.xml`:
 
 ```xml
 <properties>
-  <facetedsegmentation.version>1.0.0</facetedsegmentation.version>
+  <facetedsegmentation.version>2.0.0</facetedsegmentation.version>
 </properties>
 
 <dependencyManagement>
@@ -34,6 +34,11 @@ Add a version property and manage both artifacts in the root `pom.xml`:
     <dependency>
       <groupId>org.bloomreach.forge.facetedsegmentation</groupId>
       <artifactId>bloomreach-facetedsegmentation-repository</artifactId>
+      <version>${facetedsegmentation.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bloomreach.forge.facetedsegmentation</groupId>
+      <artifactId>bloomreach-facetedsegmentation-frontend</artifactId>
       <version>${facetedsegmentation.version}</version>
     </dependency>
     <dependency>
@@ -50,12 +55,17 @@ Then add each one to the module where it runs:
 | Artifact | Module | What it brings |
 |---|---|---|
 | `bloomreach-facetedsegmentation-repository` | `cms-dependencies/pom.xml` | The document type and the field registration. |
+| `bloomreach-facetedsegmentation-frontend` | `cms-dependencies/pom.xml` | The field and its rule builder, which the CMS serves at `/cms/angular/facetedsegmentation/`. |
 | `bloomreach-facetedsegmentation-hst` | `site/components/pom.xml` | The component, the content beans and the facet catalog endpoint. |
 
 ```xml
 <dependency>
   <groupId>org.bloomreach.forge.facetedsegmentation</groupId>
   <artifactId>bloomreach-facetedsegmentation-repository</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.bloomreach.forge.facetedsegmentation</groupId>
+  <artifactId>bloomreach-facetedsegmentation-frontend</artifactId>
 </dependency>
 ```
 
@@ -173,67 +183,49 @@ folder instead. See [Customising](customising.html).
   hst:nochannelinfo: true
   hst:authenticated: false
   hst:types: [rest]
-  hst:responseheaders: ['Access-Control-Allow-Origin: *', 'Access-Control-Expose-Headers: ETag']
+  hst:responseheaders: ['Access-Control-Allow-Origin: *', 'Access-Control-Allow-Methods: GET, OPTIONS',
+    'Access-Control-Allow-Headers: If-None-Match', 'Access-Control-Expose-Headers: ETag']
 ```
 
 Add it under every host group that needs it: local, staging and production.
 
+The field runs in the CMS and fetches from the site, so wherever the site is on another origin than
+the CMS, the browser needs the CORS headers above. `Expose-Headers: ETag` and
+`Allow-Headers: If-None-Match` let the field revalidate its cached catalog with a `304` instead of
+downloading it again.
+
 With the demo's hosts, the endpoint is `http://localhost:8080/site/api/facets`.
 
-## 6. Host the field
-
-The field and its rule builder are an Open UI extension: static HTML, JavaScript and CSS that the
-CMS loads in an iframe. It isn't a Maven artifact, so you host it yourself. 
-
-Get the files in one of two ways:
-
-- Download `faceted-segmentation-extension-1.0.0.zip` from the
-  [GitHub release](https://github.com/bloomreach-forge/faceted-segmentation/releases/tag/1.0.0).
-- Build them from source. You need Node 20.19 or later (or 22.12 or later).
-
-  ```bash
-  cd extension
-  npm ci
-  npm run build
-  ```
-
-  The files are written to `extension/dist/`.
-
-Serve the files from the **root** of their origin, for example `https://extensions.example.com/`.
-They load their scripts from `/assets/`, so they don't work from a subpath.
-
-## 7. Point the field at your hosts
+## 6. Point the field at the catalog
 
 The plugin registers the field at
-`/hippo:configuration/hippo:frontend/cms/ui-extensions/facetedSegmentation`. Two of its properties
-depend on your environment:
+`/hippo:configuration/hippo:frontend/cms/ui-extensions/facetedSegmentation`. Its `frontend:url` is
+relative, `angular/facetedsegmentation/index.html`, and the CMS serves those files from the
+`frontend` jar. It's the same in every environment, and the CMS needs no Content Security Policy
+entries for it.
 
-| Property | What to set it to |
-|---|---|
-| `frontend:url` | The field's `index.html`, from step 6. |
-| `catalogUrl`, inside `frontend:config` | The full URL of the endpoint from step 5. |
+One value depends on your environment: `catalogUrl`, inside `frontend:config`. Set it to the full
+URL of the endpoint from step 5. A relative URL resolves against the CMS, so it only works when the
+site is on the same origin.
 
-`catalogUrl` must be an absolute URL. A relative one resolves against `frontend:url`, not the CMS.
-
-The defaults suit local development: the extension's dev server at `http://localhost:5173` and the
-catalog at `http://localhost:8080/site/api/facets`. Override both in your own repository
-configuration:
+The default suits local development: `http://localhost:8080/site/api/facets`. Override it in your
+own repository configuration:
 
 ```yaml
 definitions:
   config:
     /hippo:configuration/hippo:frontend/cms/ui-extensions/facetedSegmentation:
-      frontend:url: ${facetedSegmentation.extensionUrl}
       frontend:config: '{"catalogUrl":"${facetedSegmentation.catalogUrl}","cacheTtlSeconds":300,"dialogSize":"large","absentFacetPolicy":"strict"}'
 ```
 
-The CMS fills in `${...}` from its container configuration, so you can set the values per
-environment in `$CATALINA_BASE/conf/platform.properties` without a rebuild:
+The CMS fills in `${...}` in `frontend:config` from `$CATALINA_BASE/conf/platform.properties`, so
+you can set the value per environment without a rebuild:
 
 ```properties
-facetedSegmentation.extensionUrl=https://extensions.example.com/index.html
 facetedSegmentation.catalogUrl=https://www.example.com/site/api/facets
 ```
+
+Don't put `${...}` in `frontend:url`. The CMS uses that property exactly as stored.
 
 `frontend:config` takes these options:
 
@@ -244,28 +236,6 @@ facetedSegmentation.catalogUrl=https://www.example.com/site/api/facets
 | `dialogSize` | `large` | The builder dialog's size: `small`, `medium` or `large`. |
 | `absentFacetPolicy` | `strict` | How the builder's preview treats facets the visitor has no value for. It must match the component's own `absentFacetPolicy`, or the preview won't agree with the site. See [Rendering Sections](rendering.html#absentFacetPolicy). |
 | `facets` | all | A list of value list node names, such as `size`, to offer. Leave it out to offer every facet. |
-
-## 8. Allow the field's origins in the Content Security Policy
-
-From brXM 15, the CMS blocks iframes and requests to other origins unless its Content Security
-Policy lists them. Add two entries in your repository configuration:
-
-| Directive | Origin |
-|---|---|
-| `frame-src` | Where the field is hosted (`frontend:url`). |
-| `connect-src` | Where the catalog is served (`catalogUrl`). |
-
-```yaml
-definitions:
-  config:
-    /hippo:configuration/hippo:modules/application-settings/hippo:moduleconfig/content-security-policy:
-      frame-src:
-        operation: add
-        value: ['extensions.example.com']
-      connect-src:
-        operation: add
-        value: ['www.example.com']
-```
 
 ## Check that it works
 

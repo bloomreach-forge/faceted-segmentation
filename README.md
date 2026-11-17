@@ -36,7 +36,7 @@ sentence.
 | [`common/`](common) | `bloomreach-facetedsegmentation-common` | The grammar: parser, formatter, evaluator. No brXM dependency. |
 | [`hst/`](hst) | `bloomreach-facetedsegmentation-hst` | Delivery tier — component, content beans, the facet catalog REST resource. See [hst/README.md](hst/README.md). |
 | [`repository/`](repository) | `bloomreach-facetedsegmentation-repository` | CMS side — document types, the Open UI registration, three starter value lists. |
-| [`extension/`](extension) | *(npm, not Maven)* | The Open UI field itself — React + TypeScript + Vite. See [extension/README.md](extension/README.md). |
+| [`extension/`](extension) | `bloomreach-facetedsegmentation-frontend` | The Open UI field itself — React + TypeScript + Vite, built by Maven into a jar the CMS serves at `/cms/angular/facetedsegmentation/`. See [extension/README.md](extension/README.md). |
 | [`demo/`](demo) | — | A brXM project consuming the published artifacts, as a customer project would. Not a Maven module of the root pom, so it is never released. |
 
 The grammar exists **twice**, in Java and TypeScript, because the builder runs in a browser and the
@@ -45,7 +45,7 @@ evaluator runs on the delivery tier. They are kept in lockstep by mirrored test 
 
 ## Installing into a project
 
-The four Maven artifacts are on the
+The five Maven artifacts are on the
 [Bloomreach Forge repository](https://maven.bloomreach.com/repository/maven2-forge/). Add the
 repository to your project's root pom if it is not already there:
 
@@ -64,7 +64,12 @@ In your **CMS** module (`cms-dependencies/pom.xml` or `cms/pom.xml`):
 <dependency>
   <groupId>org.bloomreach.forge.facetedsegmentation</groupId>
   <artifactId>bloomreach-facetedsegmentation-repository</artifactId>
-  <version>1.0.0</version>
+  <version>2.0.0</version>
+</dependency>
+<dependency>
+  <groupId>org.bloomreach.forge.facetedsegmentation</groupId>
+  <artifactId>bloomreach-facetedsegmentation-frontend</artifactId>
+  <version>2.0.0</version>
 </dependency>
 ```
 
@@ -74,7 +79,7 @@ In your **site components** module (`site/components/pom.xml`):
 <dependency>
   <groupId>org.bloomreach.forge.facetedsegmentation</groupId>
   <artifactId>bloomreach-facetedsegmentation-hst</artifactId>
-  <version>1.0.0</version>
+  <version>2.0.0</version>
 </dependency>
 ```
 
@@ -110,10 +115,13 @@ The Open UI field fetches its facet values over HTTP, and that endpoint needs a 
 plus an HST mount in your own project. This cannot be automatic — the reason, and the exact XML and
 YAML, are in [hst/README.md](hst/README.md#3-the-jax-rs-mount-for-the-facet-catalog-endpoint).
 
-### 4. Host the Open UI extension and point the CMS at it
+### 4. Point the Open UI field at the catalog
 
-`extension/` builds to static assets you host yourself. Then set `frontend:url` and `catalogUrl` on
-the registration node, and add the CSP allowances. Full detail, including the traps:
+The field ships in the `frontend` jar from step 1, and the CMS serves it itself, so there's nothing
+to host and no CSP entry to add. The registration's `frontend:url` is already the relative
+`angular/facetedsegmentation/index.html`. Set `catalogUrl` in its `frontend:config` to the endpoint
+from step 3, per environment through `${…}` and `platform.properties`. If the site and the CMS are
+on different origins, the mount needs CORS headers. Full detail:
 [extension/README.md](extension/README.md#requirements).
 
 ### 5. Choose where facets come from
@@ -204,14 +212,16 @@ The demo is deliberately outside the root pom's `<modules>`: it consumes the pub
 rather than reactor-building them, which is what makes it a test of the plugin instead of a test of
 the build. Run `mvn clean install` at the root **first**.
 
-For the Open UI extension:
+The root build also builds the Open UI extension: Maven installs its own Node into
+`extension/target/node`, runs `npm ci`, `npm run build` and `npm test`, and packages `dist/` as the
+`frontend` jar. To work on the extension directly:
 
 ```bash
 cd extension
 npm install
 npm run build                    # -> dist/, two entry points
 npm test
-npm run dev                      # dev server on :5173
+npm run dev                      # dev server on :5173; see demo/dev-server/ to point the demo at it
 ```
 
 ## Toolchain
@@ -220,7 +230,7 @@ npm run dev                      # dev server on :5173
 |---|---|---|
 | JDK | 21 | Corretto 21.0.11 |
 | Maven | 3.9.x | 3.9.15 |
-| Node | `^20.19.0 \|\| ^22.12.0 \|\| >=24.0.0` (extension only) | 24.19.0 |
+| Node | `^20.19.0 \|\| ^22.12.0 \|\| >=24.0.0` (extension only; the Maven build downloads 24.19.0) | 24.19.0 |
 | npm | >=10 (extension only) | 11.17.0 |
 | brXM | 17.x | 17.4.1 |
 

@@ -4,6 +4,8 @@ import { resolve } from 'node:path';
 
 export default defineConfig({
   plugins: [react()],
+  // Relative asset URLs: the CMS serves the build under /cms/angular/facetedsegmentation/, not /.
+  base: './',
   build: {
     // Two entry points: the inline field and the builder dialog.
     rollupOptions: {

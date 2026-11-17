@@ -5,15 +5,20 @@
 # UiExtensionValidator rejects hyphens and dots, and a rejected extension is silently ignored, which
 # presents as "my field renders as a plain text box" with no error anywhere.
 #
-# TWO PROPERTIES BELOW ARE ENVIRONMENT-SPECIFIC and almost certainly need overriding per deployment:
-# `frontend:url` and the `catalogUrl` inside `frontend:config`. Both default to the conventional
-# same-origin paths. Since brXM 14.7 `frontend:config` resolves ${...} against the CMS container
-# configuration, so a project can parameterise them per environment without a rebuild:
+# The field itself ships in the bloomreach-facetedsegmentation-frontend jar, which the CMS serves
+# from its classpath at /cms/angular/facetedsegmentation/ (the AngularResourceServlet every brXM CMS
+# maps to /angular/*). So `frontend:url` is relative and the same in every environment, and the
+# iframe is same-origin with the CMS: no CSP entry is needed.
 #
-#   frontend:url: ${facetedSegmentation.extensionUrl}
+# ONE PROPERTY BELOW IS ENVIRONMENT-SPECIFIC: the `catalogUrl` inside `frontend:config`. The CMS
+# resolves ${...} in `frontend:config` against platform.properties, so a project can set it per
+# environment without a rebuild:
+#
 #   frontend:config: '{"catalogUrl":"${facetedSegmentation.catalogUrl}", ...}'
 #
-# ...defining the values in $CATALINA_BASE/conf/platform.properties.
+# ...defining the value in $CATALINA_BASE/conf/platform.properties. Only `frontend:config` is
+# resolved this way. `frontend:url` is used exactly as stored (JcrUiExtensionLoader in
+# hippo-cms-openui), so a ${...} there reaches the browser as literal text.
 definitions:
   config:
     /hippo:configuration/hippo:frontend/cms/ui-extensions/facetedSegmentation:
@@ -28,17 +33,19 @@ definitions:
       # channel.page.tools, so it must be set explicitly here.
       frontend:extensionPoint: document.field
 
-      # Where the built extension assets are hosted. Defaults to a same-origin path under the CMS,
-      # which avoids needing any CSP frame-src entry at all. Point it at wherever you host dist/ —
-      # Bloomreach recommends a separate origin, in which case add that origin to frame-src.
-      frontend:url: http://localhost:5173/index.html
+      # Relative to the CMS: resolves to /cms/angular/facetedsegmentation/index.html, served from the
+      # frontend jar. To develop against the Vite dev server instead, see the demo's
+      # dev-server/ui-extension-dev-server.yaml.
+      frontend:url: angular/facetedsegmentation/index.html
 
       # Only governs the first paint: the field then calls setHeight('auto') and grows to fit.
       frontend:initialHeightInPixels: 120
 
       #   catalogUrl         where the iframe fetches facet values. The plugin's REST resource, which
-      #                      needs a mount with hst:namedpipeline: JaxrsRestPlainPipeline. There is NO
-      #                      fallback: if this is wrong the field reports the failure and disables the
+      #                      needs a mount with hst:namedpipeline: JaxrsRestPlainPipeline. A relative
+      #                      value resolves against the CMS origin, so it only works when the site
+      #                      shares that origin. When the site is on another origin, the mount needs
+      #                      CORS headers (see the demo's hosts.yaml). There is NO fallback: if this is wrong the field reports the failure and disables the
       #                      builder rather than authoring against stale data.
       #   cacheTtlSeconds    how long the browser reuses a fetched catalog.
       #   dialogSize         small | medium | large

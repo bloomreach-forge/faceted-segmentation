@@ -1,0 +1,20 @@
+# Points the demo's faceted segmentation field at the Vite dev server, for working on extension/.
+#
+# NOT ON THE CLASSPATH, so the demo ignores it by default and loads the field from the frontend jar
+# at /cms/angular/facetedsegmentation/. To use the dev server:
+#
+#   1. Copy this file to
+#      repository-data/application/src/main/resources/hcm-config/configuration/modules/
+#   2. Start the dev server:        (cd ../extension && npm run dev)     -> http://localhost:5173
+#   3. Rebuild and restart the demo: mvn clean verify && mvn -P cargo.run
+#
+# Delete the copy again when you're done. Don't commit it.
+definitions:
+  config:
+    /hippo:configuration/hippo:frontend/cms/ui-extensions/facetedSegmentation:
+      frontend:url: http://localhost:5173/index.html
+
+    /hippo:configuration/hippo:modules/application-settings/hippo:moduleconfig/content-security-policy:
+      frame-src:
+        operation: add
+        value: ['localhost:5173']

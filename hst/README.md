@@ -195,20 +195,23 @@ definitions:
         hst:nochannelinfo: true
         hst:authenticated: false
         hst:types: [rest]
-        # CORS — the Open UI extension fetches this cross-origin. Narrow beyond `*` for production.
-        hst:responseheaders: ['Access-Control-Allow-Origin: *', 'Access-Control-Expose-Headers: ETag']
+        # CORS — the Open UI field runs on the CMS origin, so this fetch is cross-origin wherever
+        # the site is on another host. Narrow beyond `*` for production.
+        hst:responseheaders: ['Access-Control-Allow-Origin: *', 'Access-Control-Allow-Methods: GET, OPTIONS',
+          'Access-Control-Allow-Headers: If-None-Match', 'Access-Control-Expose-Headers: ETag']
 ```
 
 `Access-Control-Expose-Headers: ETag` is not optional if you want `304` revalidation to work: without
 it the browser hides the `ETag` header from the client, which then can never send `If-None-Match`.
+`Access-Control-Allow-Headers: If-None-Match` is needed for the same reason: that header makes the
+browser send an `OPTIONS` preflight first, and the preflight fails without it.
 
 ### 4. Point the Open UI field at the mount
 
 `catalogUrl` in the field's `frontend:config` (on its `frontend:uiExtension` node) needs an
 absolute URL to wherever step 3's mount resolves — e.g.
-`http://localhost:8080/site/api/facets`. A relative path resolves against wherever the Open UI
-extension itself is hosted (its `frontend:url`), not against the CMS, so it only works when both
-are same-origin.
+`http://localhost:8080/site/api/facets`. A relative path resolves against the CMS origin, which
+serves the field, so it only works when the site shares that origin.
 
 See [`../demo`](../demo) for a complete worked example, including the subclassed component/catalog
 pattern from step 2.

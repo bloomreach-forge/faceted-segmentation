@@ -157,15 +157,15 @@ async function fetchCatalog(url: string, refresh: boolean): Promise<FacetCatalog
       credentials: 'omit',
     });
   } catch (cause) {
-    // fetch() rejects for network failure, DNS, refused connection, CORS rejection AND CSP
-    // blocking — the browser deliberately does not distinguish them to the page. CSP is the
-    // most likely cause in a fresh brXM install, so name it first.
+    // fetch() rejects for network failure, DNS, refused connection and CORS rejection alike —
+    // the browser deliberately does not distinguish them to the page. The field is served by the
+    // CMS, so CSP does not apply; a missing CORS header is the likely cause when the site is on
+    // another origin.
     throw new CatalogError(
       `Could not reach the facet catalog at ${target.origin}${target.pathname}. Check, in order: ` +
-        `(1) the CMS Content-Security-Policy allows this origin in connect-src; ` +
-        `(2) the catalog endpoint is deployed and running; ` +
-        `(3) it returns CORS headers permitting this extension's origin. ` +
-        `The browser console shows which of these it was — a CSP violation is reported there ` +
+        `(1) the catalog endpoint is deployed and running; ` +
+        `(2) it returns CORS headers permitting the CMS's origin. ` +
+        `The browser console shows which of these it was — a CORS rejection is reported there ` +
         `but not to this page.`,
       target.toString(),
       'unreachable',
