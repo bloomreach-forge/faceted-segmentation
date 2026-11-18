@@ -10,7 +10,7 @@ the URL.
 
 ## Run it
 
-You need JDK 21, Maven 3.9+, and Node 20.19 or later (or 22.12 or later). Clone the
+You need JDK 21 and Maven 3.9+. Clone the
 [repository](https://github.com/bloomreach-forge/faceted-segmentation), then run the plugin build
 first. The demo uses the plugin from your local Maven repository, so it must be built first:
 
@@ -18,23 +18,18 @@ first. The demo uses the plugin from your local Maven repository, so it must be 
 mvn clean install
 ```
 
-Start the field's dev server in one terminal:
-
-```bash
-cd extension
-npm ci
-npm run dev
-```
-
-The demo loads the field from `http://localhost:5173`.
-
-Build and start the demo in a second terminal:
+The build also builds the field. Maven downloads its own Node for that, so you don't need one
+installed. Then build and start the demo:
 
 ```bash
 cd demo
 mvn clean verify
 mvn -P cargo.run
 ```
+
+The CMS serves the field from the plugin's `frontend` jar, as it would in your own project. To
+work on the field itself, the demo can load it from the Vite dev server instead: see
+`demo/dev-server/` in the repository.
 
 When it has started:
 

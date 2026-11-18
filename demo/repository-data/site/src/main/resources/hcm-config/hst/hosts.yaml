@@ -40,14 +40,20 @@ definitions:
             hst:nochannelinfo: true
             hst:authenticated: false
             hst:types: [rest]
-            # CORS. The extension runs on its own origin (the Vite dev server, or wherever dist/
-            # is hosted) so the fetch is cross-origin. Scoped to this mount rather than set on
+            # CORS. The field runs on the CMS origin and fetches from the site, so the fetch is
+            # cross-origin wherever the site is on a different host than the CMS (and always when
+            # developing against the Vite dev server, see dev-server/). Locally both are
+            # localhost:8080 and the headers go unused. Scoped to this mount rather than set on
             # the virtualhost, so nothing else inherits it.
             #
             # Access-Control-Expose-Headers is NOT optional: without it the browser hides ETag
             # from the client, the client can never send If-None-Match, and 304 revalidation
             # silently never engages. The failure is invisible — just needless full payloads.
             #
+            # Allow-Headers: If-None-Match is not optional either: revalidation sends that header,
+            # which makes the browser preflight with OPTIONS, and a preflight without it fails.
+            #
             # `*` is safe here because the catalog is not user-specific and the client sends
-            # credentials: 'omit'. Narrow it to the extension's real origin when deploying.
-            hst:responseheaders: ['Access-Control-Allow-Origin: *', 'Access-Control-Expose-Headers: ETag']
+            # credentials: 'omit'. Narrow it to the CMS's real origin when deploying.
+            hst:responseheaders: ['Access-Control-Allow-Origin: *', 'Access-Control-Allow-Methods: GET, OPTIONS',
+              'Access-Control-Allow-Headers: If-None-Match', 'Access-Control-Expose-Headers: ETag']

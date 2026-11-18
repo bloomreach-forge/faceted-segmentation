@@ -16,7 +16,7 @@ The grammar, the design decisions (referenced below as D1…D14) and the module 
 
 ## Stack
 
-React 19 · TypeScript 5.9 · Vite 6 · `@bloomreach/ui-extension` 17.2.0 (matching brXM 17.2.0).
+React 19 · TypeScript 5.9 · Vite 6 · `@bloomreach/ui-extension` 17.4.1 (matching brXM 17.4.1).
 
 The `src/expression/` layer is deliberately **framework-free** — no React import — so the
 grammar can be reused by tooling, ported, or tested in isolation.
@@ -55,7 +55,7 @@ What a host project must provide before this extension works. Nothing here is op
 |---|---|---|
 | **Node** | `^20.19.0 \|\| ^22.12.0 \|\| >=24.0.0` | Declared in `engines`. Developed and verified on **24.19.0** (pinned in `.nvmrc`). |
 | **npm** | `>=10.0.0` | Verified on **11.17.0**. Needs to understand `lockfileVersion: 3`. |
-| brXM | 17.x | Built against `@bloomreach/ui-extension` 17.2.0; the SDK major should match the platform. |
+| brXM | 17.x | Built against `@bloomreach/ui-extension` 17.4.1; the SDK major should match the platform. |
 | JDK | 21 | For the host brXM project only — **not** needed to build this extension. |
 
 ```bash
@@ -79,7 +79,7 @@ non-LTS and unsupported, so `node 23` will fail even though it is "newer than 20
 
 **One deliberate omission: `engine-strict` is not enabled.** Setting it in `.npmrc` would make
 the range above a hard error rather than a warning, which sounds desirable — but npm applies
-`engine-strict` to **dependencies too**, and `@bloomreach/ui-extension@17.2.0` declares
+`engine-strict` to **dependencies too**, and `@bloomreach/ui-extension@17.4.1` declares
 `{"node":"14","npm":"7"}`, so install fails outright:
 
 ```
@@ -186,10 +186,18 @@ Two constraints on the data, which the host project owns:
   jcr:primaryType: frontend:uiExtension
   frontend:displayName: Faceted Segmentation      # MANDATORY — see below
   frontend:extensionPoint: document.field         # MANDATORY — defaults to channel.page.tools
-  frontend:url: https://extensions.example.com/index.html
+  frontend:url: angular/facetedsegmentation/index.html   # relative: served by the CMS
   frontend:initialHeightInPixels: 120
-  frontend:config: '{"catalogUrl":"https://api.example.com/api/facets","absentFacetPolicy":"permissive"}'
+  frontend:config: '{"catalogUrl":"https://www.example.com/site/api/facets","absentFacetPolicy":"permissive"}'
 ```
+
+`repository/` bootstraps this node, so a project normally only overrides `frontend:config`.
+`frontend:url` is relative to the CMS: the `bloomreach-facetedsegmentation-frontend` jar puts the
+build on the CMS classpath under `angular/facetedsegmentation/`, and the `AngularResourceServlet`
+every brXM CMS maps to `/angular/*` serves it at `/cms/angular/facetedsegmentation/index.html`.
+That is how Bloomreach's own Open UI integrations ship (the commerce pickers, Bynder, Cloudinary).
+The CMS appends `br.antiCache` to the iframe URL, so a new CMS deployment is never served a stale
+`index.html`.
 
 Three traps, all verified in the brXM CND (`[frontend:uiExtension]` in
 `community/cms/types/.../frontend.cnd`) rather than taken from the documentation:
@@ -202,45 +210,32 @@ Three traps, all verified in the brXM CND (`[frontend:uiExtension]` in
 - **Node names must be alphanumeric.** `faceted-segmentation` is rejected by
   `UiExtensionValidator`; `facetedSegmentation` is fine.
 
-### 5. Content Security Policy allowances
+### 5. No Content Security Policy entries
 
-CSP is on by default from brXM 15. Add the extension's origin and the catalog's origin at
-`/hippo:configuration/hippo:modules/application-settings/hippo:moduleconfig/content-security-policy`:
+CSP is on by default from brXM 15, but the field needs no entries:
 
-- **`frame-src`** — the extension origin (`frontend:url`)
-- **`connect-src`** — the catalog origin (`catalogUrl`)
+- **`frame-src`**: the CMS page allows `'self'`, and the field is served by the CMS itself.
+- **`connect-src`**: the catalog fetch runs in the field's own document, and the CMS serves
+  `/cms/angular/**` without a CSP header, so nothing restricts it.
 
-```yaml
-definitions:
-  config:
-    /hippo:configuration/hippo:modules/application-settings/hippo:moduleconfig/content-security-policy:
-      jcr:primaryType: nt:unstructured      # NOT hipposys:moduleconfig
-      frame-src:
-        operation: add                      # add, never replace
-        value: ['extensions.example.com']
-      connect-src:
-        operation: add
-        value: ['extensions.example.com', 'api.example.com']
-```
+What the catalog does need, when the site is on a different origin from the CMS (the usual case
+outside local development), is **CORS headers on its mount**. See
+[hst/README.md](../hst/README.md#3-the-jax-rs-mount-for-the-facet-catalog-endpoint).
 
-- **Use `operation: add`.** The platform ships a populated default list (auth0,
-  `tools.bloomreach.com`, userguiding, Google Maps); a plain definition replaces it and breaks
-  unrelated CMS features.
-- Values are bare `host[:port]` — no scheme, no quoted `'self'`.
-- **Missing `connect-src` is the confusing failure**: the field renders fine and the catalog
-  silently fails to load. The UI surfaces this as a visible error rather than an empty facet list.
-- Same-origin hosting needs no CSP entries at all. Bloomreach nonetheless recommends a separate
-  origin, and `[frontend:uiExtension]` also permits a per-extension
-  `content-security-policy` child node — **unverified**, but potentially tidier than mutating
-  shared config.
+Only developing against the Vite dev server (`frontend:url: http://localhost:5173/index.html`)
+needs a CSP entry: `localhost:5173` in `frame-src`. The demo's
+[`dev-server/`](../demo/dev-server) has a ready-made override.
 
-### 6. Per-environment origins
+### 6. Per-environment values
 
-`frontend:url` and the CSP host lists differ per environment (local, UAT, production) and
-**must not be baked into a build**. Since brXM 14.7 `frontend:config` resolves `${...}` against
-the CMS container configuration, so use e.g. `"catalogUrl": "${facetCatalog.url}"` and define it
-in `$CATALINA_BASE/conf/platform.properties` per environment. `frontend:url` itself is per
-environment YAML.
+Only `catalogUrl` differs per environment (local, UAT, production), and it **must not be baked into
+a build**. `frontend:config` resolves `${...}` against `platform.properties`, so use e.g.
+`"catalogUrl": "${facetedSegmentation.catalogUrl}"` and define it in
+`$CATALINA_BASE/conf/platform.properties` per environment.
+
+`frontend:url` is **not** resolved that way: `JcrUiExtensionLoader` (in `hippo-cms-openui`) passes it
+through as stored, so a `${...}` there reaches the browser as literal text. With the relative URL it
+doesn't need to vary.
 
 ### 7. A delivery-tier evaluator
 
@@ -256,15 +251,19 @@ until the delivery tier parses and evaluates it.** That implementation must:
 
 ## Installing into brXM
 
-1. `npm run build` → `dist/` (two entry points: `index.html`, `dialog.html`)
-2. Host `dist/` somewhere the browser can reach — ideally a different origin than the CMS
-3. Add the registration node (requirement 4) and the CSP allowances (requirement 5)
-4. Point `frontend:url` at the hosted `index.html`, and `catalogUrl` at your catalog endpoint
-5. Set `ui.extension` on each field that should use it (requirement 3)
+1. Add `bloomreach-facetedsegmentation-frontend` and `bloomreach-facetedsegmentation-repository` to
+   the CMS webapp. The first carries the built field, the second its registration node
+   (requirement 4).
+2. Point `catalogUrl` at your catalog endpoint (requirement 6), with CORS on its mount if the site
+   is on another origin.
+3. Set `ui.extension` on each field that should use it (requirement 3).
 
-For local development, `frontend:url: http://localhost:5173/index.html` against `npm run dev`
-works. The CSP needs `localhost:5173` in `frame-src`, plus whatever origin serves the catalog in
-`connect-src`.
+The Maven build (`mvn install` in this directory or at the root) installs Node, runs `npm ci`,
+`npm run build` and `npm test`, and packages `dist/` under `angular/facetedsegmentation/`. Vite
+builds with `base: './'`, so every asset URL is relative to wherever the CMS serves the files.
+
+For local development, run `npm run dev` and point the demo at it with
+[`demo/dev-server/`](../demo/dev-server).
 
 ## Scripts
 
@@ -402,7 +401,7 @@ it inline and the full diagnosis goes to the browser console under `[faceted-seg
 
 | What happened | `kind` | What the message tells the editor |
 |---|---|---|
-| `fetch` rejected | `unreachable` | Check in order: CSP `connect-src` allows the origin; the endpoint is deployed; it returns permissive CORS headers. The browser reports a CSP violation to the console but **not** to the page, which is why all three are named. |
+| `fetch` rejected | `unreachable` | Check in order: the endpoint is deployed; it returns CORS headers permitting the CMS's origin. The browser reports a CORS rejection to the console but **not** to the page, which is why both are named. |
 | `catalogUrl` is not a valid URL | `unreachable` | Fix `catalogUrl` in `frontend:config`. |
 | 404 | `not-found` | The path is wrong, or the REST resource is not mapped in the site webapp. |
 | 401 / 403 | `unauthorized` | The endpoint wants credentials this client does not send — facet values are not user-specific and the endpoint should be readable unauthenticated. |
