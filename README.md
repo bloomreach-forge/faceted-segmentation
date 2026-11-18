@@ -428,10 +428,8 @@ is legitimate and is left alone.
 Functionally complete. The demo renders end-to-end — drag the catalog item onto a page, and a `PersonalizedContent`
 document's sections are gated by their expressions.
 
-Before a first release:
-
-- **Version is `1.0.0-SNAPSHOT`.** Publishing to the Forge repository needs a release build, and
-  only Bloomreach developers have write access there.
+Released on the [Bloomreach Forge repository](https://maven.bloomreach.com/repository/maven2-forge/).
+Changes per version are in the [release notes](src/site/markdown/release-notes.md).
 
 Known gaps, deliberate:
 
